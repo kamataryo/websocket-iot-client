@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import update from 'immutability-helper'
 import io     from 'socket.io-client'
+import Checkbox from './Checkbox.jsx'
 const socket = io.connect('http://localhost:3000')
 
 /**
@@ -25,7 +26,7 @@ export default class App extends Component {
    */
   componentDidMount() {
     // set handler
-    socket.on('initialize', data => this.setState({ ...data }))
+    socket.on('downstream', data => this.setState({ ...data }))
   }
 
   /**
@@ -34,30 +35,43 @@ export default class App extends Component {
    */
   render() {
 
+    /**
+     * create Checkbox props
+     * @param  {string} slug  giving slug for this component
+     * @param  {string} label displaying label
+     * @return {{value:object,update:function}}  spreading props for Checkbox component
+     */
+    const createProps = (slug, label) => ({
+      slug,
+      label,
+      checked: this.state[slug],
+      update: e => {
+        // do set state
+        this.setState(update(this.state, { [slug]: { $set: e.target.checked } }))
+        // websocket
+        socket.emit('upstream', { [slug]: e.target.checked })
+      }
+    })
 
-    socket.on('update', data => this.setState({ ...data }))
+    console.log(this.state)
 
     return <div>
       <header
         className={ 'header' }
         id={ 'header' }
-      >{ 'header' }</header>
+      >{ '' }</header>
 
       <main id={ 'app_main' }>
-        <h1>{ this.state.a }</h1>
-        <input
-          type={ 'check' }
-          onChange={ e => {
-            this.setState(update(this.state, { a: { $set: e.target.value } }))
-            socket.emit('switch', { a: e.target.value })
-          } }
-        />
+
+        <Checkbox { ...createProps('a', 'スイッチA') } />
+        <Checkbox { ...createProps('b', 'スイッチB') } />
+
       </main>
 
       <footer
         className={ 'footer' }
         id={ 'footer' }
-      >{ 'footer' }</footer>
+      >{ '' }</footer>
     </div>
   }
 

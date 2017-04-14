@@ -10,11 +10,7 @@ const store = { data: {} }
 
 const server = http.createServer(app)
 
-server.listen(PORT, () => {
-  console.log(`listening on *:${PORT}`)
-})
-console.log(`Server listening on port ${PORT}`)
-
+server.listen(PORT, () => console.log(`listening on *:${PORT}`))
 
 app.use((req, res, next) => {
   console.log('error')
@@ -24,11 +20,12 @@ app.use((req, res, next) => {
 
 io.listen(server).sockets.on('connection', socket => {
 
-  socket.emit('initialize', store.data)
+  socket.emit('downstream', store.data)
 
-  socket.on('switch', data => {
+  socket.on('upstream', data => {
     store.data = { ...store.data, ...data }
-    socket.broadcast.emit('update', store.data)
+
+    socket.broadcast.emit('downstream', store.data)
   })
 
   socket.on('disconnect', () => {
