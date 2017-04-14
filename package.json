@@ -4,8 +4,8 @@
   "description": "This is a chat board server.",
   "main": "index.js",
   "scripts": {
-    "build": "webpack -p && NODE_ENV=production babel ./server --out-dir ./lib --source-maps inline",
-    "start": "npm run build && node ./lib/index.js",
+    "build": "NODE_ENV=production babel ./server --out-dir ./lib --source-maps inline",
+    "start": "webpack-dev-server --progress --colors --hot --inline --watch & PS=$! & npm run build && node ./lib/index.js && kill $PS",
     "lint": "eslint . --ext=js --ext=jsx",
     "test": "npm run lint"
   },
@@ -21,10 +21,11 @@
   "homepage": "https://github.com/KamataRyo/board_server#readme",
   "dependencies": {
     "express": "^4.15.2",
-    "socket.io": "^1.7.3",
     "prop-types": "^15.5.8",
     "react": "^15.5.4",
-    "react-dom": "^15.5.4"
+    "react-dom": "^15.5.4",
+    "socket.io": "^1.7.3",
+    "socket.io-client": "^1.7.3"
   },
   "devDependencies": {
     "babel-cli": "^6.24.1",

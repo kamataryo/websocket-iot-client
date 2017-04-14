@@ -1,20 +1,11 @@
-// $(function () {
-//   var socket = io()
-//   $('form').submit(function(){
-//     socket.emit('chat message', $('#m').val())
-//     $('#m').val('')
-//     return false
-//   })
-// })
-
-
-import React from 'react'
+import React      from 'react'
 import { render } from 'react-dom'
+import App        from './Components/App.jsx'
+import io         from 'socket.io-client'
 
-const App = () => <p>hello</p>
-
+const socket = io.connect("http://localhost:3000")
 
 render(
-  <App />,
+  <App { ...{ socket } }/>,
   document.getElementById('app')
 )
