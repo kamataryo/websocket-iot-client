@@ -6,7 +6,7 @@ var app = express()
 
 const PORT = process.env.PORT || 3000
 
-const store = { messages: {} }
+const store = { data: {} }
 
 const server = http.createServer(app)
 
@@ -24,9 +24,11 @@ app.use((req, res, next) => {
 
 io.listen(server).sockets.on('connection', socket => {
 
-  socket.on('switch', messages => {
-    store.messages = { ...store.messages, messages }
-    console.log(store)
+  socket.emit('initialize', store.data)
+
+  socket.on('switch', data => {
+    store.data = { ...store.data, ...data }
+    socket.broadcast.emit('update', store.data)
   })
 
   socket.on('disconnect', () => {

@@ -21,6 +21,7 @@
   "homepage": "https://github.com/KamataRyo/board_server#readme",
   "dependencies": {
     "express": "^4.15.2",
+    "immutability-helper": "^2.1.2",
     "prop-types": "^15.5.8",
     "react": "^15.5.4",
     "react-dom": "^15.5.4",
