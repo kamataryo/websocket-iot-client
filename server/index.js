@@ -1,7 +1,6 @@
 import express  from 'express'
 import http     from 'http'
 import socketIO from 'socket.io'
-import auth     from 'socketio-auth'
 import { yellow, red, blue, green } from 'chalk'
 
 /**
@@ -23,10 +22,6 @@ const PORT = process.env.PORT || 3000
  */
 const store = { data: {} }
 
-/**
- * Create Server
- * @type {Server}
- */
 const server = http.createServer(app)
 
 server.listen(PORT, () => process.stdout.write(`[${SYSTEM}] listening on *:${PORT}`))
@@ -37,27 +32,32 @@ app.use((req, res, next) => {
 })
 
 const io = socketIO.listen(server)
-auth(io, {
-  authenticate: (socket, data, callback) => {
-    console.log('aaa')
-    const { username, password } = data
-    callback(true)
-  }
-})
 
 io.sockets.on('connection', socket => {
 
-  socket.emit('downstream', store.data)
-  process.stdout.write(`[${USER}] connected\n`)
+  // authenticate on connection
+  socket.on('auth', data => {
+    if (data.username === 'kamataryo') {
+      socket.emit('permit', true)
 
-  socket.on('upstream', data => {
-    process.stdout.write(`[${UPSTREAM}] ${JSON.stringify(data)}\n`)
-    store.data = { ...store.data, ...data }
-    socket.broadcast.emit('downstream', data)
-    process.stdout.write(`[${DOWNSTREAM}] ${JSON.stringify(data)}\n`)
-  })
+      socket.emit('downstream', store.data)
+      process.stdout.write(`[${USER}] ${data.usrname} connected\n`)
 
-  socket.on('disconnect', () => {
-    process.stdout.write(`[${USER}] disconnected\n`)
+      socket.on('upstream', data => {
+        process.stdout.write(`[${UPSTREAM}] ${JSON.stringify(data)}\n`)
+        store.data = { ...store.data, ...data }
+        socket.broadcast.emit('downstream', data)
+        process.stdout.write(`[${DOWNSTREAM}] ${JSON.stringify(data)}\n`)
+      })
+
+      socket.on('disconnect', () => {
+        process.stdout.write(`[${USER}] disconnected\n`)
+      })
+
+    } else {
+      socket.emit('permit', false)
+      socket.disconnect()
+      console.log('disconnected')
+    }
   })
 })

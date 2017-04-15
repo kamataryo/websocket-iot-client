@@ -45,11 +45,17 @@ export default class LoginView extends Component {
   tryConnect = () => {
     const socket = io.connect(this.state.endpoint)
     socket.on('connect', () => {
-      socket.emit('authentication', {
+      socket.emit('auth', {
         username: this.state.username,
         password: this.state.password
       })
-      this.props.onConnect(socket)
+      socket.on('permit', permitted => {
+        if (permitted) {
+          this.props.onConnect(socket)
+        } else {
+          alert('auth failed')
+        }
+      })
     })
   }
 
