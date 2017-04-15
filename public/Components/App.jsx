@@ -23,9 +23,29 @@ export default class App extends Component {
   constructor() {
     super()
     this.state = {
-      isLoginSuccess: false,
+      isLoginSuccess : false,
+      socket         : false,
     }
   }
+
+  /**
+   * optimizaion
+   * @return {boolean} whether should update
+   */
+  shouldComponentUpdate() {
+    return true
+  }
+
+  /**
+   * onConnect callback
+   * @param  {Socket} socket Socket.IO ibject
+   * @return {void}
+   */
+  onConnect = socket => {
+    console.log(socket)
+    this.setState({ socket, isLoginSuccess: true })
+  }
+
 
   /**
    * [onLoginSuccess description]
@@ -53,8 +73,13 @@ export default class App extends Component {
           />
 
           { this.state.isLoginSuccess ?
-            <ControllerView /> :
-            <LoginView onTryLogin={ this.onTryLogin } />
+            <ControllerView
+              socket={ this.state.socket }
+            /> :
+            <LoginView
+              onConnect={ this.onConnect }
+              onTryLogin={ this.onTryLogin }
+            />
           }
 
         </main>

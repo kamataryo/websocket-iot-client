@@ -1,6 +1,7 @@
-import express from 'express'
-import http    from 'http'
-import io      from 'socket.io'
+import express  from 'express'
+import http     from 'http'
+import socketIO from 'socket.io'
+import auth     from 'socketio-auth'
 import { yellow, red, blue, green } from 'chalk'
 
 /**
@@ -35,7 +36,16 @@ app.use((req, res, next) => {
   next()
 })
 
-io.listen(server).sockets.on('connection', socket => {
+const io = socketIO.listen(server)
+auth(io, {
+  authenticate: (socket, data, callback) => {
+    console.log('aaa')
+    const { username, password } = data
+    callback(true)
+  }
+})
+
+io.sockets.on('connection', socket => {
 
   socket.emit('downstream', store.data)
   process.stdout.write(`[${USER}] connected\n`)

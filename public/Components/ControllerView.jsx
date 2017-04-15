@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import update               from 'immutability-helper'
-import io                   from 'socket.io-client'
 
 import Toggle       from 'material-ui/Toggle'
 import Slider       from 'material-ui/Slider'
@@ -13,7 +12,7 @@ import { RadioButton, RadioButtonGroup } from 'material-ui/RadioButton'
  * Create Socket Connection
  * @type {Socket}
  */
-const socket = io.connect('http://localhost:3000')
+// const socket = io.connect('http://localhost:3000')
 
 /**
  * ControllerView
@@ -37,13 +36,13 @@ export default class ControllerView extends Component {
    */
   componentDidMount() {
     // set handler
-    socket.on('downstream', data => this.setState({ ...this.state, ...data }))
+    this.props.socket.on('downstream', data => this.setState({ ...this.state, ...data }))
   }
 
   /**
    * create onChang callback
    * @param  {string} slug id for element recognition
-   * @param  {Event} e     [description]
+   * @param  {Event}  e     [description]
    * @param  {object} value [description]
    * @return {function}       [description]
    */
@@ -52,7 +51,7 @@ export default class ControllerView extends Component {
       // do set state
       this.setState(update(this.state, { [slug]: { $set: value } }))
       // websocket
-      socket.emit('upstream', { [slug]: value })
+      this.props.socket.emit('upstream', { [slug]: value })
     }
   }
 
@@ -126,7 +125,7 @@ export default class ControllerView extends Component {
           onTouchTap={ () => {
             const nullState = this.createNullState()
             this.setState(nullState)
-            socket.emit('upstream', nullState)
+            this.props.socket.emit('upstream', nullState)
           } }
         />
 
