@@ -1,7 +1,16 @@
 import React, { Component } from 'react'
 import update from 'immutability-helper'
 import io     from 'socket.io-client'
-import Checkbox from './Checkbox.jsx'
+
+import AppBar       from 'material-ui/appbar'
+import Toggle       from 'material-ui/toggle'
+import Slider       from 'material-ui/slider'
+import RaisedButton from 'material-ui/raisedbutton'
+
+/**
+ * Create Socket Connection
+ * @type {Socket}
+ */
 const socket = io.connect('http://localhost:3000')
 
 /**
@@ -39,40 +48,77 @@ export default class App extends Component {
      * create Checkbox props
      * @param  {string} slug  giving slug for this component
      * @param  {string} label displaying label
-     * @return {{value:object,update:function}}  spreading props for Checkbox component
+     * @return {object}  spreading props for Checkbox component
      */
-    const createProps = (slug, label) => ({
-      slug,
+    const createToggleProps = (slug, label) => ({
       label,
-      checked: this.state[slug],
-      update: e => {
+      toggled: this.state[slug],
+      // toggle: this.state[slug],
+      onToggle: (e, isInputChecked) => {
         // do set state
-        this.setState(update(this.state, { [slug]: { $set: e.target.checked } }))
+        this.setState(update(this.state, { [slug]: { $set: isInputChecked } }))
         // websocket
-        socket.emit('upstream', { [slug]: e.target.checked })
+        socket.emit('upstream', { [slug]: isInputChecked })
       }
     })
 
-    console.log(this.state)
+    /**
+     * create props for slider component
+     * @param  {string} slug [description]
+     * @return {object}      [description]
+     */
+    const createSliderProps = slug => ({
+      axis: 'x',
+      max: 100,
+      min: 0,
+      step: 1,
+      name: slug,
+      onChange: (e, newValue) => {
+        // do set state
+        this.setState(update(this.state, { [slug]: { $set: newValue } }))
+        // websocket
+        socket.emit('upstream', { [slug]: newValue })
+      },
+      value: this.state[slug] ? this.state[slug] : 0
+    })
 
-    return <div>
-      <header
-        className={ 'header' }
-        id={ 'header' }
-      >{ '' }</header>
+    return (
+      <div>
+        <main className={ 'main-contianer' }>
+          <AppBar
+            showMenuIconButton={ false }
+            title={ 'WebSocket Switch' }
+            titleStyle={ { textAlign: 'center' } }
+          />
 
-      <main id={ 'app_main' }>
-
-        <Checkbox { ...createProps('a', 'スイッチA') } />
-        <Checkbox { ...createProps('b', 'スイッチB') } />
-
-      </main>
-
-      <footer
-        className={ 'footer' }
-        id={ 'footer' }
-      >{ '' }</footer>
-    </div>
+          <section className={ 'controls' }>
+            <Toggle className={ 'line' } { ...createToggleProps('a', 'スイッチ') } />
+            <Toggle className={ 'line' } { ...createToggleProps('b', 'スイッチ') } />
+            <Toggle className={ 'line' } { ...createToggleProps('c', 'スイッチ') } />
+            <div className={ 'line slider-wrap' }>
+              <label htmlFor={ 'd' }>{ 'スライダー ' }<strong>{ this.state.d || ' ' }</strong></label>
+              <Slider { ...createSliderProps('d') } />
+            </div>
+            <div className={ 'line slider-wrap' }>
+              <label htmlFor={ 'e' }>{ 'スライダー ' }<strong>{ this.state.e || ' ' }</strong></label>
+              <Slider { ...createSliderProps('e') } />
+            </div>
+            <RaisedButton
+              label={ 'RESET' }
+              primary
+              onTouchTap={ () => {
+                const nullState = Object.keys(this.state).reduce((prev, slug) => {
+                  prev[slug] = false
+                  return prev
+                }, {})
+                this.setState(nullState)
+                socket.emit('upstream', nullState)
+              } }
+            />
+          </section>
+        </main>
+      </div>
+    )
   }
 
 }

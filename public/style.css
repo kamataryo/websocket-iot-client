@@ -1,3 +1,21 @@
 body {
   font-size: 18px;
 }
+
+.main-contianer {
+  max-width: 768px;
+  margin: auto;
+  background-color: #E8F5E9;
+}
+
+.line {
+  margin: 2em auto;
+}
+
+.slider-wrap {
+  margin: 3em auto;
+}
+
+.controls {
+  padding: 50px 200px;
+}
