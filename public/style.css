@@ -1,21 +1,22 @@
-body {
+body, label {
   font-size: 18px;
+  color:#666666 !important;
 }
 
 .main-contianer {
   max-width: 540px;
   margin: auto;
-  background-color: #E8F5E9;
+  background-color: #E0F7FA;
 }
 
-.line {
+.margin-one-half {
   margin: 1.5em auto;
 }
 
-.slider-wrap {
+.margin-three {
   margin: 3em auto;
 }
 
 .controls {
-  padding: 50px 20px;
+  padding: 50px 40px;
 }

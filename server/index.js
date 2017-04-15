@@ -1,6 +1,6 @@
 import express from 'express'
-import http from 'http'
-import io from 'socket.io'
+import http    from 'http'
+import io      from 'socket.io'
 import { yellow, red, blue, green } from 'chalk'
 
 /**
@@ -9,10 +9,10 @@ import { yellow, red, blue, green } from 'chalk'
  */
 const USER       = yellow('USER')
 const UPSTREAM   = blue('UPSTREAM')
-const BROADCAST  = red('BROADCAST')
+const DOWNSTREAM = red('DOWNSTREAM')
 const SYSTEM     = green('SYSTEM')
 
-var app = express()
+const app = express()
 
 const PORT = process.env.PORT || 3000
 
@@ -43,8 +43,8 @@ io.listen(server).sockets.on('connection', socket => {
   socket.on('upstream', data => {
     process.stdout.write(`[${UPSTREAM}] ${JSON.stringify(data)}\n`)
     store.data = { ...store.data, ...data }
-    socket.broadcast.emit('downstream', store.data)
-    process.stdout.write(`[${BROADCAST}] ${JSON.stringify(store.data)}\n`)
+    socket.broadcast.emit('downstream', data)
+    process.stdout.write(`[${DOWNSTREAM}] ${JSON.stringify(data)}\n`)
   })
 
   socket.on('disconnect', () => {

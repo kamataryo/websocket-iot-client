@@ -1,11 +1,14 @@
 import React, { Component } from 'react'
-import update from 'immutability-helper'
-import io     from 'socket.io-client'
+import update               from 'immutability-helper'
+import io                   from 'socket.io-client'
 
-import AppBar       from 'material-ui/appbar'
-import Toggle       from 'material-ui/toggle'
-import Slider       from 'material-ui/slider'
-import RaisedButton from 'material-ui/raisedbutton'
+import AppBar       from 'material-ui/AppBar'
+import Toggle       from 'material-ui/Toggle'
+import Slider       from 'material-ui/Slider'
+import RaisedButton from 'material-ui/RaisedButton'
+import Divider      from 'material-ui/Divider'
+import { RadioButton, RadioButtonGroup } from 'material-ui/RadioButton'
+
 
 /**
  * Create Socket Connection
@@ -31,11 +34,27 @@ export default class App extends Component {
 
   /**
    * Did Mount
-   * @return {[type]} [description]
+   * @return {void}
    */
   componentDidMount() {
     // set handler
-    socket.on('downstream', data => this.setState({ ...data }))
+    socket.on('downstream', data => this.setState({ ...this.state, ...data }))
+  }
+
+  /**
+   * create onChang callback
+   * @param  {string} slug id for element recognition
+   * @param  {Event} e     [description]
+   * @param  {object} value [description]
+   * @return {function}       [description]
+   */
+  onChange(slug) {
+    return (e, value) => {
+      // do set state
+      this.setState(update(this.state, { [slug]: { $set: value } }))
+      // websocket
+      socket.emit('upstream', { [slug]: value })
+    }
   }
 
   /**
@@ -55,47 +74,10 @@ export default class App extends Component {
    */
   render() {
 
-    /**
-     * create Checkbox props
-     * @param  {string} slug  giving slug for this component
-     * @param  {string} label displaying label
-     * @return {object}  spreading props for Checkbox component
-     */
-    const createToggleProps = (slug, label) => ({
-      label,
-      toggled: this.state[slug],
-      // toggle: this.state[slug],
-      onToggle: (e, isInputChecked) => {
-        // do set state
-        this.setState(update(this.state, { [slug]: { $set: isInputChecked } }))
-        // websocket
-        socket.emit('upstream', { [slug]: isInputChecked })
-      }
-    })
-
-    /**
-     * create props for slider component
-     * @param  {string} slug [description]
-     * @return {object}      [description]
-     */
-    const createSliderProps = slug => ({
-      axis: 'x',
-      max: 100,
-      min: 0,
-      step: 1,
-      name: slug,
-      onChange: (e, newValue) => {
-        // do set state
-        this.setState(update(this.state, { [slug]: { $set: newValue } }))
-        // websocket
-        socket.emit('upstream', { [slug]: newValue })
-      },
-      value: this.state[slug] ? this.state[slug] : 0
-    })
-
     return (
       <div>
         <main className={ 'main-contianer' }>
+
           <AppBar
             showMenuIconButton={ false }
             title={ 'WebSocket IoT UI' }
@@ -103,17 +85,51 @@ export default class App extends Component {
           />
 
           <section className={ 'controls' }>
-            <Toggle className={ 'line' } { ...createToggleProps('a', 'スイッチ') } />
-            <Toggle className={ 'line' } { ...createToggleProps('b', 'スイッチ') } />
-            <Toggle className={ 'line' } { ...createToggleProps('c', 'スイッチ') } />
-            <div className={ 'line slider-wrap' }>
-              <label htmlFor={ 'd' }>{ 'スライダー ' }<strong>{ this.state.d || ' ' }</strong></label>
-              <Slider { ...createSliderProps('d') } />
-            </div>
-            <div className={ 'line slider-wrap' }>
+
+            <Toggle
+              className={ 'margin-one-half ' }
+              label={ 'スイッチ' }
+              toggled={ this.state.switch }
+              onToggle={ this.onChange('switch') }
+            />
+
+            <Divider />
+
+            <div className={ 'margin-three' }>
               <label htmlFor={ 'e' }>{ 'スライダー ' }<strong>{ this.state.e || ' ' }</strong></label>
-              <Slider { ...createSliderProps('e') } />
+              <Slider
+                axis={ 'x' }
+                max={ 100 }
+                min={ 0 }
+                name={ 'slider' }
+                step={ 1 }
+                value={ this.state.slider ? this.state.slider : 0 }
+                onChange={ this.onChange('slider') }
+              />
             </div>
+
+            <Divider />
+
+            <RadioButtonGroup
+              className={ 'margin-one-half ' }
+              name={ 'radio' }
+              valueSelected={ this.state.radio }
+              onChange={ this.onChange('radio') }
+            >
+              <RadioButton
+                label="ラジオ1"
+                value="radio1"
+              />
+              <RadioButton
+                label="ラジオ2"
+                value="radio2"
+              />
+              <RadioButton
+                label="ラジオ3"
+                value="radio3"
+              />
+            </RadioButtonGroup>
+
             <p>
               <RaisedButton
                 label={ 'RESET' }
@@ -125,7 +141,7 @@ export default class App extends Component {
                 } }
               />
             </p>
-            <footer><a href="https://github.com/kamataryo/websocket-iot-ui">{ 'Folk Me!' }</a></footer>
+
           </section>
         </main>
       </div>
