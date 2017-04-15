@@ -3,13 +3,13 @@ body {
 }
 
 .main-contianer {
-  max-width: 768px;
+  max-width: 540px;
   margin: auto;
   background-color: #E8F5E9;
 }
 
 .line {
-  margin: 2em auto;
+  margin: 1.5em auto;
 }
 
 .slider-wrap {
@@ -17,5 +17,5 @@ body {
 }
 
 .controls {
-  padding: 50px 200px;
+  padding: 50px 20px;
 }

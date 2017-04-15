@@ -39,6 +39,17 @@ export default class App extends Component {
   }
 
   /**
+   * Create updating null state
+   * @return {object} null state
+   */
+  createNullState() {
+    return Object.keys(this.state).reduce((prev, slug) => {
+      prev[slug] = false
+      return prev
+    }, {})
+  }
+
+  /**
    * Render
    * @return {ReactDomElement} React DOM Element
    */
@@ -87,7 +98,7 @@ export default class App extends Component {
         <main className={ 'main-contianer' }>
           <AppBar
             showMenuIconButton={ false }
-            title={ 'WebSocket Switch' }
+            title={ 'WebSocket IoT UI' }
             titleStyle={ { textAlign: 'center' } }
           />
 
@@ -103,18 +114,18 @@ export default class App extends Component {
               <label htmlFor={ 'e' }>{ 'スライダー ' }<strong>{ this.state.e || ' ' }</strong></label>
               <Slider { ...createSliderProps('e') } />
             </div>
-            <RaisedButton
-              label={ 'RESET' }
-              primary
-              onTouchTap={ () => {
-                const nullState = Object.keys(this.state).reduce((prev, slug) => {
-                  prev[slug] = false
-                  return prev
-                }, {})
-                this.setState(nullState)
-                socket.emit('upstream', nullState)
-              } }
-            />
+            <p>
+              <RaisedButton
+                label={ 'RESET' }
+                primary
+                onTouchTap={ () => {
+                  const nullState = this.createNullState()
+                  this.setState(nullState)
+                  socket.emit('upstream', nullState)
+                } }
+              />
+            </p>
+            <footer><a href="https://github.com/kamataryo/websocket-iot-ui">{ 'Folk Me!' }</a></footer>
           </section>
         </main>
       </div>

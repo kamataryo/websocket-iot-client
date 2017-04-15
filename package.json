@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/KamataRyo/board_server#readme",
   "dependencies": {
+    "chalk": "^1.1.3",
     "express": "^4.15.2",
     "immutability-helper": "^2.1.2",
     "material-ui": "^0.17.4",
