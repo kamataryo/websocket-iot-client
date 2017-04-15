@@ -17,6 +17,6 @@ body, label {
   margin: 3em auto;
 }
 
-.controls {
+.controls, .login {
   padding: 50px 40px;
 }
