@@ -1,20 +1,14 @@
 import React, { Component } from 'react'
-import update               from 'immutability-helper'
-import io                   from 'socket.io-client'
-
+import update from 'immutability-helper'
 import AppBar       from 'material-ui/AppBar'
-import Toggle       from 'material-ui/Toggle'
-import Slider       from 'material-ui/Slider'
-import RaisedButton from 'material-ui/RaisedButton'
-import Divider      from 'material-ui/Divider'
-import { RadioButton, RadioButtonGroup } from 'material-ui/RadioButton'
 
+import ControllerView from './ControllerView.jsx'
+import LoginView      from './LoginView.jsx'
 
 /**
  * Create Socket Connection
  * @type {Socket}
  */
-const socket = io.connect('http://localhost:3000')
 
 /**
  * App Container
@@ -23,49 +17,43 @@ const socket = io.connect('http://localhost:3000')
 export default class App extends Component {
 
   /**
-   * Constructor
-   * @param  {Props} props Props
+   * constructor
    * @return {void}
    */
-  constructor(props) {
-    super(props)
-    this.state = {} // initialize
-  }
-
-  /**
-   * Did Mount
-   * @return {void}
-   */
-  componentDidMount() {
-    // set handler
-    socket.on('downstream', data => this.setState({ ...this.state, ...data }))
-  }
-
-  /**
-   * create onChang callback
-   * @param  {string} slug id for element recognition
-   * @param  {Event} e     [description]
-   * @param  {object} value [description]
-   * @return {function}       [description]
-   */
-  onChange(slug) {
-    return (e, value) => {
-      // do set state
-      this.setState(update(this.state, { [slug]: { $set: value } }))
-      // websocket
-      socket.emit('upstream', { [slug]: value })
+  constructor() {
+    super()
+    this.state = {
+      isLoginSuccess : false,
+      socket         : false,
     }
   }
 
   /**
-   * Create updating null state
-   * @return {object} null state
+   * optimizaion
+   * @return {boolean} whether should update
    */
-  createNullState() {
-    return Object.keys(this.state).reduce((prev, slug) => {
-      prev[slug] = false
-      return prev
-    }, {})
+  shouldComponentUpdate() {
+    return true
+  }
+
+  /**
+   * onConnect callback
+   * @param  {Socket} socket Socket.IO ibject
+   * @return {void}
+   */
+  onConnect = socket => {
+    console.log(socket)
+    this.setState({ socket, isLoginSuccess: true })
+  }
+
+
+  /**
+   * [onLoginSuccess description]
+   * @param {boolean} result whether login success
+   * @return {void} [description]
+   */
+  onTryLogin(result) {
+    this.setState(update(this.state, { isLoginSuccess: { $set: result } }))
   }
 
   /**
@@ -84,65 +72,16 @@ export default class App extends Component {
             titleStyle={ { textAlign: 'center' } }
           />
 
-          <section className={ 'controls' }>
-
-            <Toggle
-              className={ 'margin-one-half ' }
-              label={ 'スイッチ' }
-              toggled={ this.state.switch }
-              onToggle={ this.onChange('switch') }
+          { this.state.isLoginSuccess ?
+            <ControllerView
+              socket={ this.state.socket }
+            /> :
+            <LoginView
+              onConnect={ this.onConnect }
+              onTryLogin={ this.onTryLogin }
             />
+          }
 
-            <Divider />
-
-            <div className={ 'margin-three' }>
-              <label htmlFor={ 'e' }>{ 'スライダー ' }<strong>{ this.state.e || ' ' }</strong></label>
-              <Slider
-                axis={ 'x' }
-                max={ 100 }
-                min={ 0 }
-                name={ 'slider' }
-                step={ 1 }
-                value={ this.state.slider ? this.state.slider : 0 }
-                onChange={ this.onChange('slider') }
-              />
-            </div>
-
-            <Divider />
-
-            <RadioButtonGroup
-              className={ 'margin-one-half ' }
-              name={ 'radio' }
-              valueSelected={ this.state.radio }
-              onChange={ this.onChange('radio') }
-            >
-              <RadioButton
-                label="ラジオ1"
-                value="radio1"
-              />
-              <RadioButton
-                label="ラジオ2"
-                value="radio2"
-              />
-              <RadioButton
-                label="ラジオ3"
-                value="radio3"
-              />
-            </RadioButtonGroup>
-
-            <p>
-              <RaisedButton
-                label={ 'RESET' }
-                primary
-                onTouchTap={ () => {
-                  const nullState = this.createNullState()
-                  this.setState(nullState)
-                  socket.emit('upstream', nullState)
-                } }
-              />
-            </p>
-
-          </section>
         </main>
       </div>
     )
