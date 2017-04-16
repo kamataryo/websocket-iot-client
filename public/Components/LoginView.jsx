@@ -23,10 +23,11 @@ export default class LoginView extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      username   : '',
-      endpoint   : 'http://localhost:3000',
-      password   : '',
-      authFailed : undefined,
+      username         : '',
+      endpoint         : 'http://localhost:3000',
+      password         : '',
+      authFailed       : undefined,
+      connectionFailed : undefined
     }
   }
 
@@ -45,20 +46,28 @@ export default class LoginView extends Component {
    */
   tryConnect = () => {
     const socket = io.connect(this.state.endpoint)
-    socket.on('connect', () => {
-      // try authentication
-      socket.emit('auth', {
-        username: this.state.username,
-        password: this.state.password
+    socket
+      .on('connect', () => {
+        // try authentication
+        socket.emit('auth', {
+          username: this.state.username,
+          password: this.state.password
+        })
+        // wait response
+        socket.on('permit', permitted => {
+          if (permitted) {
+            this.props.onConnect(socket, permitted)
+          }
+          this.setState(update(this.state, {
+            authFailed       : { $set: !permitted },
+            connectionFailed : { $set: false },
+          }))
+        })
       })
-      // wait response
-      socket.on('permit', permitted => {
-        if (permitted) {
-          this.props.onConnect(socket, permitted)
-        }
-        this.setState(update(this.state, { authFailed: { $set: !permitted } }))
+      .on('connect_error', () => {
+        this.setState(update(this.state, { connectionFailed: { $set: true } }))
+        socket.disconnect()
       })
-    })
   }
 
   /**
@@ -73,20 +82,22 @@ export default class LoginView extends Component {
         <div className={ 'margin-one-half' }>
 
           <TextField
+            errorText={ this.state.connectionFailed === true ? 'エンドポイントとの接続に失敗しました。URLが間違っているかもしれません' : false }
             hintText={ 'Socket.IO Endpoint URL' }
             value={ this.state.endpoint }
             onChange={ this.updateCertification('endpoint') }
+            onFocus={ () => this.setState(update(this.state, { connectionFailed: { $set: undefined } })) }
           />
 
           <TextField
-            errorText={ this.state.authFailed === true ? 'ユーザー名が不正かもしれません' : false }
+            errorText={ this.state.authFailed === true ? 'ユーザー名が間違っているかもしれません' : false }
             hintText={ 'username' }
             onChange={ this.updateCertification('username') }
             onFocus={ () => this.setState(update(this.state, { authFailed: { $set: undefined } })) }
           />
 
           <TextField
-            errorText={ this.state.authFailed === true ? 'パスワードが不正かもしれません' : false }
+            errorText={ this.state.authFailed === true ? 'パスワードが間違っているかもしれません' : false }
             hintText={ 'password' }
             type={ 'password' }
             onChange={ this.updateCertification('password') }
