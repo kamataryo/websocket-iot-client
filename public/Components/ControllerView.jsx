@@ -59,9 +59,20 @@ export default class ControllerView extends Component {
    * Create updating null state
    * @return {object} null state
    */
-  createNullState() {
+  createNegativeState() {
     return Object.keys(this.state).reduce((prev, slug) => {
       prev[slug] = false
+      return prev
+    }, {})
+  }
+
+/**
+ * Create updating positive state
+ * @return {object} [description]
+ */
+  createPositiveState() {
+    return Object.keys(this.state).reduce((prev, slug) => {
+      prev[slug] = true
       return prev
     }, {})
   }
@@ -100,7 +111,7 @@ export default class ControllerView extends Component {
         <Divider />
 
         <RadioButtonGroup
-          className={ 'margin-one-half ' }
+          className={ 'margin-one-half radios' }
           name={ 'radio' }
           valueSelected={ this.state.radio }
           onChange={ this.onChange('radio') }
@@ -120,12 +131,12 @@ export default class ControllerView extends Component {
         </RadioButtonGroup>
 
         <RaisedButton
-          label={ 'RESET' }
+          label={ 'OFF' }
           primary
           onTouchTap={ () => {
-            const nullState = this.createNullState()
-            this.setState(nullState)
-            this.props.socket.emit('upstream', nullState)
+            const negativeState = this.createNegativeState()
+            this.setState(negativeState)
+            this.props.socket.emit('upstream', negativeState)
           } }
         />
 

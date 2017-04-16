@@ -1,6 +1,6 @@
 body, label {
   font-size: 18px;
-  color:#666666 !important;
+  color:#666 !important;
 }
 
 .main-contianer {
@@ -19,4 +19,8 @@ body, label {
 
 .controls, .login {
   padding: 50px 40px;
+}
+
+.radios svg {
+  color: #666;
 }

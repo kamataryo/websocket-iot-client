@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
-import update from 'immutability-helper'
-import AppBar       from 'material-ui/AppBar'
+
+import AppBar from 'material-ui/AppBar'
 
 import ControllerView from './ControllerView.jsx'
 import LoginView      from './LoginView.jsx'
@@ -23,8 +23,8 @@ export default class App extends Component {
   constructor() {
     super()
     this.state = {
-      isLoginSuccess : false,
-      socket         : false,
+      isLoginSuccessed : false,
+      socket           : false,
     }
   }
 
@@ -39,21 +39,11 @@ export default class App extends Component {
   /**
    * onConnect callback
    * @param  {Socket} socket Socket.IO ibject
+   * @param  {boolean} isLoginSuccessed is login successed
    * @return {void}
    */
-  onConnect = socket => {
-    console.log(socket)
-    this.setState({ socket, isLoginSuccess: true })
-  }
-
-
-  /**
-   * [onLoginSuccess description]
-   * @param {boolean} result whether login success
-   * @return {void} [description]
-   */
-  onTryLogin(result) {
-    this.setState(update(this.state, { isLoginSuccess: { $set: result } }))
+  onConnect = (socket, isLoginSuccessed) => {
+    this.setState({ socket, isLoginSuccessed })
   }
 
   /**
@@ -72,13 +62,12 @@ export default class App extends Component {
             titleStyle={ { textAlign: 'center' } }
           />
 
-          { this.state.isLoginSuccess ?
+          { this.state.isLoginSuccessed ?
             <ControllerView
               socket={ this.state.socket }
             /> :
             <LoginView
               onConnect={ this.onConnect }
-              onTryLogin={ this.onTryLogin }
             />
           }
 

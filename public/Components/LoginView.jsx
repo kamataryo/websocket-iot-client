@@ -23,9 +23,10 @@ export default class LoginView extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      username : '',
-      endpoint : 'http://localhost:3000',
-      password : '',
+      username   : '',
+      endpoint   : 'http://localhost:3000',
+      password   : '',
+      authFailed : undefined,
     }
   }
 
@@ -45,16 +46,17 @@ export default class LoginView extends Component {
   tryConnect = () => {
     const socket = io.connect(this.state.endpoint)
     socket.on('connect', () => {
+      // try authentication
       socket.emit('auth', {
         username: this.state.username,
         password: this.state.password
       })
+      // wait response
       socket.on('permit', permitted => {
         if (permitted) {
-          this.props.onConnect(socket)
-        } else {
-          alert('auth failed')
+          this.props.onConnect(socket, permitted)
         }
+        this.setState(update(this.state, { authFailed: { $set: !permitted } }))
       })
     })
   }
@@ -71,20 +73,24 @@ export default class LoginView extends Component {
         <div className={ 'margin-one-half' }>
 
           <TextField
-            hintText={ 'Socket.IO endpoint URL' }
+            hintText={ 'Socket.IO Endpoint URL' }
             value={ this.state.endpoint }
             onChange={ this.updateCertification('endpoint') }
           />
 
           <TextField
+            errorText={ this.state.authFailed === true ? 'ユーザー名が不正かもしれません' : false }
             hintText={ 'username' }
             onChange={ this.updateCertification('username') }
+            onFocus={ () => this.setState(update(this.state, { authFailed: { $set: undefined } })) }
           />
 
           <TextField
+            errorText={ this.state.authFailed === true ? 'パスワードが不正かもしれません' : false }
             hintText={ 'password' }
             type={ 'password' }
             onChange={ this.updateCertification('password') }
+            onFocus={ () => this.setState(update(this.state, { authFailed: { $set: undefined } })) }
           />
         </div>
 
