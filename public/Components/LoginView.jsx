@@ -82,7 +82,7 @@ export default class LoginView extends Component {
         <div className={ 'margin-one-half' }>
 
           <TextField
-            errorText={ this.state.connectionFailed === true ? 'エンドポイントとの接続に失敗しました。URLが間違っているかもしれません' : false }
+            errorText={ this.state.connectionFailed === true ? 'エンドポイントとの接続に失敗しました。URLが間違っているか、サーバーが死んだのでしょう' : false }
             hintText={ 'Socket.IO Endpoint URL' }
             value={ this.state.endpoint }
             onChange={ this.updateCertification('endpoint') }

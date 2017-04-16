@@ -38,13 +38,15 @@ socketIO
   .sockets.on('connection', socket => {
 
     // authenticate on connection
-    socket.on('auth', data => {
+    socket.on('auth', async data => {
 
       const { username, password } = data
 
       process.stdout.write(`[${CONNECTION}][${Date()}] ${username} is connected.\n`)
 
-      if (authenticate(username, password)) {
+      const authSuccessed = await authenticate(username, password)
+
+      if (authSuccessed) {
 
         socket.emit('permit', true)
         socket.emit('downstream', store.data)
