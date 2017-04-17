@@ -1,6 +1,12 @@
 import io     from 'socket.io-client'
 import config from '../config'
 
+const {
+  AUTH_REQUIRED,
+  CONNECTION_FAILED,
+  IS_LOGGED_IN,
+} = config.StatusTypes
+
 /**
  * [description]
  * @param  {object} opts [description]
@@ -15,7 +21,7 @@ export default opts => new Promise(resolve => {
     password,
     token
   } = opts
-  const authinfo = token ? { token } : { username, password }
+  const authinfo = token ? { username, token } : { username, password }
 
   // create connection
   const socket = io.connect(endpoint)
@@ -25,20 +31,42 @@ export default opts => new Promise(resolve => {
       // try authentication
       socket.emit('auth', authinfo)
       // wait response
-      socket.on('permit', permittion => {
+      socket.on('permit', ({ permittion, token }) => {
         if (permittion === 'OK') {
-          resolve({ token, socket, status: config.StatusTypes.IS_LOGGED_IN })
+          resolve({
+            token,
+            socket,
+            status : {
+              type: IS_LOGGED_IN,
+              message: '',
+              isError: false,
+            }
+          })
         } else if (permittion === 'expired') {
           socket.disconnect()
-          resolve({ status: config.StatusTypes.IS_TOKEN_EXPIRED })
+          resolve({ status: {
+            type    : AUTH_REQUIRED,
+            message : 'ログインが必要です。',
+            isError : false
+          } })
         } else {
           socket.disconnect()
-          resolve({ status: config.StatusTypes.AUTH_FAILED })
+          resolve({ status: {
+            type    : AUTH_REQUIRED,
+            message : 'ログインできませんでした。',
+            isError : true,
+          } })
         }
       })
     })
     .on('connect_error', () => {
       socket.disconnect()
-      resolve({ status: config.StatusTypes.CONNECTION_FAILED })
+      resolve({
+        status: {
+          type    :CONNECTION_FAILED,
+          message :'サーバーと接続できませんでした。',
+          isError : true,
+        }
+      })
     })
 })

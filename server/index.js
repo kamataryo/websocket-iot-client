@@ -6,7 +6,7 @@ import { yellow, red, blue, green } from 'chalk'
 import authenticate from './authenticate'
 
 /**
- * message headers
+ * log headers
  * @type {string}
  */
 const UPSTREAM      = blue('UPSTREAM')
@@ -38,36 +38,40 @@ socketIO
   .sockets.on('connection', socket => {
 
     // authenticate on connection
-    socket.on('auth', async data => {
+    socket.on('auth', data => {
 
-      const { username, password } = data
+      const username = data.username
 
       process.stdout.write(`[${CONNECTION}][${Date()}] ${username} is connected.\n`)
 
-      const authSuccessed = await authenticate(username, password)
+      authenticate(data)
+        .then(( { permission, token }) => {
 
-      if (authSuccessed) {
+          if (permission === 'ok') {
 
-        socket.emit('permit', true)
-        socket.emit('downstream', store.data)
-        process.stdout.write(`[${AUTHORIZATION}][${Date()}] ${username} is authorized.\n`)
+            socket.emit('permit', { permission, token })
+            // sync the connecting client
+            socket.emit('downstream', store.data)
+            process.stdout.write(`[${AUTHORIZATION}][${Date()}] ${username} is authorized.\n`)
 
-        socket.on('upstream', data => {
-          process.stdout.write(`[${UPSTREAM}][${Date()}] ${username} upload ${JSON.stringify(data)}.\n`)
-          store.data = { ...store.data, ...data }
-          socket.broadcast.emit('downstream', data)
-          process.stdout.write(`[${DOWNSTREAM}][${Date()}] system is broadcasting ${JSON.stringify(data)}\n`)
+            // reflect the connecting client's state to all
+            socket.on('upstream', data => {
+              process.stdout.write(`[${UPSTREAM}][${Date()}] ${username} upload ${JSON.stringify(data)}.\n`)
+              store.data = { ...store.data, ...data }
+              socket.broadcast.emit('downstream', data)
+              process.stdout.write(`[${DOWNSTREAM}][${Date()}] system is broadcasting ${JSON.stringify(data)}\n`)
+            })
+
+            socket.on('disconnect', () => {
+              process.stdout.write(`[${CONNECTION}][${Date()}] ${username} is disconnected.\n`)
+            })
+
+          } else {
+            socket.emit('permit', false)
+            socket.disconnect()
+            process.stdout.write(`[${AUTHORIZATION}][${Date()}] ${username} is not authorized.\n`)
+            process.stdout.write(`[${CONNECTION}][${Date()}] ${username} is disconnected.\n`)
+          }
         })
-
-        socket.on('disconnect', () => {
-          process.stdout.write(`[${CONNECTION}][${Date()}] ${username} is disconnected.\n`)
-        })
-
-      } else {
-        socket.emit('permit', false)
-        socket.disconnect()
-        process.stdout.write(`[${AUTHORIZATION}][${Date()}] ${username} is not authorized.\n`)
-        process.stdout.write(`[${CONNECTION}][${Date()}] ${username} is disconnected.\n`)
-      }
     })
   })

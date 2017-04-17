@@ -1,10 +1,10 @@
 export default {
+  // 画面の切り替えに用いるステータス
   StatusTypes: {
-    IS_LOADING            : 'IS_LOADING',
-    AUTH_FAILED           : 'AUTH_FAILED',
-    CONNECTION_FAILED     : 'CONNECTION_FAILED',
-    IS_LOGGED_IN          : 'IS_LOGGED_IN',
-    IS_TOKEN_EXPIRED      : 'IS_TOKEN_EXPIRED',
-    UNKNOWN_ERROR_OCCURED : 'UNKNOWN_ERROR_OCCURED',
-  }
+    AUTH_REQUIRED     : 'AUTH_REQUIRED',
+    CONNECTION_FAILED : 'CONNECTION_FAILED',
+    IS_LOADING        : 'IS_LOADING',
+    IS_LOGGED_IN      : 'IS_LOGGED_IN',
+  },
+  DEFAULT_ENDPOINT: 'http://localhost:3000'
 }

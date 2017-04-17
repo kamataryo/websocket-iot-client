@@ -1,10 +1,30 @@
 import jwt from 'jsonwebtoken'
 
 
-export default (username, password) => {
-  const token = jwt.sign({ username }, 'private Key sample')
+export default ({ username, password, token }) => new Promise(resolve => {
 
-  jwt.verify(token, 'private Key sample')
+  // check token and authorize
+  if (token) {
+    jwt.verify(token, 'private Key sample', (err, x) => {
+      if (!err) {
+        resolve({ permission: 'ok', token })
+      } else {
+        resolve({ permission: 'ng' })
+      }
+    })
+    return
+  }
 
-  return username === password && username !== ''
-}
+  // authenticate with username and password
+  if (username === password && username !== '') {
+    jwt.sign({ username }, 'private Key sample', (err, token) => {
+      if (!err) {
+        resolve({ permission: 'ok', token })
+      } else {
+        resolve({ permission: 'ng' })
+      }
+    })
+  }
+
+
+})

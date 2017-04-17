@@ -3,7 +3,22 @@ import PropTypes            from 'prop-types'
 import update               from 'immutability-helper'
 import RaisedButton         from 'material-ui/RaisedButton'
 import TextField            from 'material-ui/TextField'
-import io                   from 'socket.io-client'
+
+import config from '../config'
+
+// parse constants
+const STATUS_TYPES = Object.keys(config.StatusTypes)
+
+const {
+  StatusTypes : {
+    AUTH_REQUIRED,
+    CONNECTION_FAILED,
+    IS_LOADING,
+    IS_LOGGED_IN,
+  },
+  DEFAULT_ENDPOINT
+} = config
+
 
 /**
  * LoginView
@@ -12,7 +27,19 @@ import io                   from 'socket.io-client'
 export default class LoginView extends Component {
 
   static PropTypes = {
-    onConnect: PropTypes.func.isRequired
+    isError    : PropTypes.bool,
+    message    : PropTypes.string,
+    statusType : PropTypes.oneOf(STATUS_TYPES),
+    endpoint   : PropTypes.endpoint,
+    username   : PropTypes.string,
+  }
+
+  static defaultProps = {
+    isError    : false,
+    message    : '',
+    statusType : IS_LOADING,
+    endpoint   : DEFAULT_ENDPOINT,
+    username   : '',
   }
 
   /**
@@ -20,61 +47,69 @@ export default class LoginView extends Component {
    * @param {Props} props Props
    * @return {void}
    */
-  constructor(props) {
-    super(props)
-    this.state = {
-      username         : '',
-      endpoint         : 'http://localhost:3000',
-      password         : '',
-      authFailed       : undefined,
-      connectionFailed : undefined
-    }
-  }
+  // constructor(props) {
+  //   super(props)
+  //   this.state = {
+  //     username         : this.props.username,
+  //     endpoint         : 'http://localhost:3000',
+  //     password         : '',
+  //     authFailed       : undefined,
+  //     connectionFailed : undefined
+  //   }
+  // }
 
   /**
    * create callback to update Certification infomation
    * @param  {string} param username, endpoint, password
    * @return {void}
    */
-  updateCertification(param) {
-    return (e, value) => this.setState(update(this.state, { [param]: { $set: value } }))
-  }
+  // updateCertification(param) {
+  //   return (e, value) => this.setState(update(this.state, { [param]: { $set: value } }))
+  // }
 
   /**
    * [tryConnect description]
    * @return {void} [description]
    */
-  tryConnect = () => {
-    const socket = io.connect(this.state.endpoint)
-    socket
-      .on('connect', () => {
-        // try authentication
-        socket.emit('auth', {
-          username: this.state.username,
-          password: this.state.password
-        })
-        // wait response
-        socket.on('permit', permitted => {
-          if (permitted) {
-            this.props.onConnect(socket, permitted)
-          }
-          this.setState(update(this.state, {
-            authFailed       : { $set: !permitted },
-            connectionFailed : { $set: false },
-          }))
-        })
-      })
-      .on('connect_error', () => {
-        this.setState(update(this.state, { connectionFailed: { $set: true } }))
-        socket.disconnect()
-      })
-  }
+  // tryConnect = () => {
+  //   const socket = io.connect(this.state.endpoint)
+  //   socket
+  //     .on('connect', () => {
+  //       // try authentication
+  //       socket.emit('auth', {
+  //         username: this.state.username,
+  //         password: this.state.password
+  //       })
+  //       // wait response
+  //       socket.on('permit', permitted => {
+  //         if (permitted) {
+  //           this.props.onConnect(socket, permitted)
+  //         }
+  //         this.setState(update(this.state, {
+  //           authFailed       : { $set: !permitted },
+  //           connectionFailed : { $set: false },
+  //         }))
+  //       })
+  //     })
+  //     .on('connect_error', () => {
+  //       this.setState(update(this.state, { connectionFailed: { $set: true } }))
+  //       socket.disconnect()
+  //     })
+  // }
 
   /**
    * [render description]
    * @return {void}
    */
   render() {
+
+    const {
+      isError,
+      message,
+      statusType,
+      endpoint,
+      username,
+    } = this.props
 
     return (
       <section className={ 'login' }>
@@ -84,7 +119,7 @@ export default class LoginView extends Component {
           <TextField
             errorText={ this.state.connectionFailed === true ? 'エンドポイントとの接続に失敗しました。URLが間違っているか、サーバーが死んだのでしょう' : false }
             hintText={ 'Socket.IO Endpoint URL' }
-            value={ this.state.endpoint }
+            value={ this.props.endpoint }
             onChange={ this.updateCertification('endpoint') }
             onFocus={ () => this.setState(update(this.state, { connectionFailed: { $set: undefined } })) }
           />
