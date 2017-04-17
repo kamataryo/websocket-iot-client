@@ -33,8 +33,8 @@ export default class App extends Component {
    * constructor
    * @return {void}
    */
-  constructor() {
-    super()
+  constructor(props) {
+    super(props)
     this.state = {
       endpoint : DEFAULT_ENDPOINT,
       socket   : undefined,
@@ -97,6 +97,9 @@ export default class App extends Component {
    * @return {ReactDomElement} React DOM Element
    */
   render() {
+
+
+    this.props.title === ''
 
     // for all
     const { status } = this.state

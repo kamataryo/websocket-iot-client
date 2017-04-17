@@ -18,6 +18,9 @@ const app = express()
 
 const PORT = process.env.PORT || 3000
 
+const a = { ...a, ...b }
+
+
 /**
  * Store data
  * @type {Object}
