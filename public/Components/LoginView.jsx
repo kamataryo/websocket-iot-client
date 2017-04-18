@@ -55,6 +55,9 @@ const mapDispatchToProps = dispatch => ({
             payload: { login: true }
           })
 
+          // clean up username and password
+          dispatch({ type: 'UPDATE_PARAMS', payload: { username: '', password: '' } })
+
           // this client doesn't need permitation from now
           socket.off('permit')
 
@@ -85,6 +88,9 @@ const mapDispatchToProps = dispatch => ({
               name: 'logout',
               callback: () => {
                 cookie.remove(ACCESS_TOKEN)
+                // clean up username and password
+                dispatch({ type: 'UPDATE_PARAMS', payload: { username: '', password: '' } })
+                // do logout
                 dispatch({ type: 'LOGIN', payload: { login: false } })
               }
             }
@@ -145,6 +151,10 @@ export default class LoginView extends Component {
 
     const token = cookie.load(ACCESS_TOKEN)
     if (token) {
+      this.props.updateParams({
+        username: 'automatically logging in...',
+        password: 'xxxxxxxxxxxxxxxx' // simply place holder
+      })
       this.props.connect({
         token,
         endpoint     : this.props.endpoint,

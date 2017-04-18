@@ -44,7 +44,7 @@ export default class App extends Component {
 
           <main className={ 'main-contianer' }>
             <AppBar
-              iconElementRight={ <IconButton><ExitToApp /></IconButton> }
+              iconElementRight={ <IconButton tooltip={ 'logout' }><ExitToApp /></IconButton> }
               showMenuIconButton={ false }
               title={ 'WebSocket IoT UI - Controller' }
               onRightIconButtonTouchTap={ logout }
