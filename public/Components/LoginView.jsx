@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import { connect }          from 'react-redux'
+import cookie               from 'react-cookie'
 import PropTypes            from 'prop-types'
 import RaisedButton         from 'material-ui/RaisedButton'
 import TextField            from 'material-ui/TextField'
@@ -28,17 +29,20 @@ const mapStateToProps = state => ({
  * @return {Props}             Mapping props
  */
 const mapDispatchToProps = dispatch => ({
-  connect: ({ endpoint, username, password }) => {
+  connect: ({ endpoint, username, password, token }) => {
 
     const socket = io.connect(endpoint)
     socket.on('connect', () => {
 
       // try auth
-      socket.emit('auth', { username, password })
+      socket.emit('auth', { username, password, token })
 
       // add Event Listener on authentication success/failure
-      socket.on('permit', success => {
-        if (success) {
+      socket.on('permit', ({ permission, token }) => {
+        if (permission) {
+          // save token as a cookie
+          cookie.save('access_token', token)
+
           // login
           dispatch({
             type: 'LOGIN',
@@ -107,6 +111,22 @@ export default class LoginView extends Component {
     username : '',
     password : '',
     error    : false,
+  }
+
+  /**
+   * componentDidMount
+   * @return {void}
+   */
+  componentDidMount() {
+
+    const token = cookie.load('access_token')
+    if (token) {
+      this.props.connect({
+        endpoint: this.props.endpoint,
+        token
+      })
+    }
+
   }
 
   /**

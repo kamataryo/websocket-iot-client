@@ -45,11 +45,11 @@ socketIO
 
       process.stdout.write(`[${CONNECTION}][${Date()}] ${username} is connected.\n`)
 
-      const success = authenticate(data)
+      const { success, token } = authenticate(data)
 
       if (success) {
 
-        socket.emit('permit', true)
+        socket.emit('permit', { permission: true, token })
         // sync the connecting client
         socket.emit('downstream', store.data)
         process.stdout.write(`[${AUTHORIZATION}][${Date()}] ${username} is authorized.\n`)
