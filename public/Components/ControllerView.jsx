@@ -15,7 +15,7 @@ import { RadioButton, RadioButtonGroup } from 'material-ui/RadioButton'
  */
 const mapStateToProps = state => ({
   buttonState  : state.buttonState,
-  buttonUpdate : state.upstreamCallback
+  buttonUpdate : state.callbacks.emitUpstream
 })
 
 @connect(mapStateToProps)

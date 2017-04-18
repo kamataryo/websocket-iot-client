@@ -2,13 +2,14 @@ import update from 'immutability-helper'
 
 
 const initialState = {
-  endpoint         : 'http://localhost:3000',
-  username         : '',
-  password         : '',
-  error            : false,
-  buttonState      : {},
-  upstreamCallback : x => x,
-  isLoggedIn       : false,
+  endpoint     : 'http://localhost:3000',
+  username     : '',
+  password     : '',
+  error        : false,
+  enableCookie : false,
+  buttonState  : {},
+  callbacks    : {},
+  isLoggedIn   : false,
 }
 
 export default (state = initialState, action) => {
@@ -22,7 +23,7 @@ export default (state = initialState, action) => {
     case 'UPDATE_PARAMS':
       const kvs = action.payload
       const paramUpdator = Object.keys(kvs)
-        .filter(key => ['username', 'password', 'endpoint', 'error'].includes(key))
+        .filter(key => ['username', 'password', 'endpoint', 'error', 'enableCookie'].includes(key))
         .reduce((prev, key) => {
           const value = kvs[key]
           prev[key] = { $set: value }
@@ -40,9 +41,9 @@ export default (state = initialState, action) => {
         }, { buttonState: {} })
       return update(state, buttonStateUpdator)
 
-    case 'SET_UPSTREAM_CALLBACK':
-      const { callback } = action.payload
-      return update(state, { upstreamCallback: { $set : callback } })
+    case 'DEFINE_CALLBACK':
+      const { name, callback } = action.payload
+      return update(state, { callbacks: { [name]: { $set: callback } } })
 
     default:
       return state

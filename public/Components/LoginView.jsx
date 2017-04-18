@@ -3,6 +3,7 @@ import { connect }          from 'react-redux'
 import cookie               from 'react-cookie'
 import PropTypes            from 'prop-types'
 import RaisedButton         from 'material-ui/RaisedButton'
+import Checkbox             from 'material-ui/Checkbox'
 import TextField            from 'material-ui/TextField'
 import io                   from 'socket.io-client'
 
@@ -11,16 +12,19 @@ const ERRORs = {
   CONN_ERROR: 'サーバーとの接続に失敗しました',
 }
 
+const ACCESS_TOKEN = 'access_token'
+
 /**
  * mapStateToProps
  * @param  {State} state State
  * @return {Props}       mapping props
  */
 const mapStateToProps = state => ({
-  endpoint : state.endpoint,
-  username : state.username,
-  password : state.password,
-  error    : state.error,
+  endpoint     : state.endpoint,
+  username     : state.username,
+  password     : state.password,
+  error        : state.error,
+  enableCookie : state.enableCookie,
 })
 
 /**
@@ -29,7 +33,7 @@ const mapStateToProps = state => ({
  * @return {Props}             Mapping props
  */
 const mapDispatchToProps = dispatch => ({
-  connect: ({ endpoint, username, password, token }) => {
+  connect: ({ endpoint, username, password, token, enableCookie }) => {
 
     const socket = io.connect(endpoint)
     socket.on('connect', () => {
@@ -41,7 +45,9 @@ const mapDispatchToProps = dispatch => ({
       socket.on('permit', ({ permission, token }) => {
         if (permission) {
           // save token as a cookie
-          cookie.save('access_token', token)
+          if (enableCookie) {
+            cookie.save(ACCESS_TOKEN, token)
+          }
 
           // login
           dispatch({
@@ -62,12 +68,28 @@ const mapDispatchToProps = dispatch => ({
 
           // add Event Listener of upstream as callback
           dispatch({
-            type: 'SET_UPSTREAM_CALLBACK',
-            payload: { callback: buttonState => {
-              socket.emit('upstream', buttonState)
-              dispatch({ type: 'UPDATE_BUTTON_STATE', payload: { buttonState } })
-            } }
+            type: 'DEFINE_CALLBACK',
+            payload: {
+              name: 'emitUpstream',
+              callback: buttonState => {
+                socket.emit('upstream', buttonState)
+                dispatch({ type: 'UPDATE_BUTTON_STATE', payload: { buttonState } })
+              }
+            }
           })
+
+          // add Logout callback
+          dispatch({
+            type: 'DEFINE_CALLBACK',
+            payload: {
+              name: 'logout',
+              callback: () => {
+                cookie.remove(ACCESS_TOKEN)
+                dispatch({ type: 'LOGIN', payload: { login: false } })
+              }
+            }
+          })
+
 
         } else {
           // auth failed and close connection
@@ -103,14 +125,16 @@ export default class LoginView extends Component {
       PropTypes.bool,
       PropTypes.oneOf(Object.keys(ERRORs)),
     ]),
-    updateParams : PropTypes.func.isRequried
+    updateParams : PropTypes.func.isRequried,
+    enableCookie : PropTypes.bool.isRequired,
   }
 
   static defaultProps = {
-    endpoint : '',
-    username : '',
-    password : '',
-    error    : false,
+    endpoint     : '',
+    username     : '',
+    password     : '',
+    error        : false,
+    enableCookie : false,
   }
 
   /**
@@ -119,14 +143,14 @@ export default class LoginView extends Component {
    */
   componentDidMount() {
 
-    const token = cookie.load('access_token')
+    const token = cookie.load(ACCESS_TOKEN)
     if (token) {
       this.props.connect({
-        endpoint: this.props.endpoint,
-        token
+        token,
+        endpoint     : this.props.endpoint,
+        enableCookie : true,
       })
     }
-
   }
 
   /**
@@ -141,6 +165,7 @@ export default class LoginView extends Component {
       password,
       connect,
       error,
+      enableCookie,
       updateParams,
     } = this.props
 
@@ -175,10 +200,17 @@ export default class LoginView extends Component {
           />
         </div>
 
+        <Checkbox
+          checked={ enableCookie }
+          className={ 'margin-one-half' }
+          label={ '自動でログインする' }
+          onCheck={ (e, value) => updateParams({ enableCookie: value }) }
+        />
+
         <RaisedButton
           label={ 'LOGIN' }
           primary
-          onTouchTap={ () => connect({ endpoint, username, password }) }
+          onTouchTap={ () => connect({ endpoint, username, password, enableCookie }) }
         />
 
       </section>

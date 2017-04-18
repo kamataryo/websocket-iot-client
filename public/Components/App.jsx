@@ -2,6 +2,8 @@ import React, { Component } from 'react'
 import { connect }          from 'react-redux'
 import PropTypes            from 'prop-types'
 import AppBar         from 'material-ui/AppBar'
+import IconButton     from 'material-ui/IconButton'
+import ExitToApp      from 'material-ui/svg-icons/action/exit-to-app'
 import ControllerView from './ControllerView.jsx'
 import LoginView      from './LoginView.jsx'
 
@@ -11,7 +13,8 @@ import LoginView      from './LoginView.jsx'
  * @return {Props}       mapping props
  */
 const mapStateToProps = state => ({
-  isLoggedIn: state.isLoggedIn,
+  isLoggedIn : state.isLoggedIn,
+  logout     : state.callbacks.logout,
 })
 
 @connect(mapStateToProps)
@@ -32,20 +35,31 @@ export default class App extends Component {
   render() {
 
 
-    const { isLoggedIn } = this.props
+    const { isLoggedIn, logout } = this.props
 
     return (
       <div>
-        <main className={ 'main-contianer' }>
 
-          <AppBar
-            showMenuIconButton={ false }
-            title={ 'WebSocket IoT UI' }
-            titleStyle={ { textAlign: 'center' } }
-          />
-          { isLoggedIn ? <ControllerView /> : <LoginView /> }
+        { isLoggedIn ?
 
-        </main>
+          <main className={ 'main-contianer' }>
+            <AppBar
+              iconElementRight={ <IconButton><ExitToApp /></IconButton> }
+              showMenuIconButton={ false }
+              title={ 'WebSocket IoT UI - Controller' }
+              onRightIconButtonTouchTap={ logout }
+            />
+            <ControllerView />
+          </main> :
+
+          <main className={ 'main-contianer' }>
+            <AppBar
+              showMenuIconButton={ false }
+              title={ 'WebSocket IoT UI - Login' }
+            />
+            <LoginView />
+          </main>
+        }
       </div>
     )
   }
