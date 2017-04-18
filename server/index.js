@@ -12,13 +12,11 @@ import authenticate from './authenticate'
 const UPSTREAM      = blue('UPSTREAM')
 const DOWNSTREAM    = green('DOWNSTREAM')
 const CONNECTION    = yellow('CONNECTION')
-const AUTHORIZATION = red('CONNECTION')
+const AUTHORIZATION = red('AUTHORIZATION')
 
 const app = express()
 
 const PORT = process.env.PORT || 3000
-
-const a = { ...a, ...b }
 
 
 /**
@@ -47,34 +45,33 @@ socketIO
 
       process.stdout.write(`[${CONNECTION}][${Date()}] ${username} is connected.\n`)
 
-      authenticate(data)
-        .then(( { permission, token }) => {
+      const success = authenticate(data)
 
-          if (permission === 'ok') {
+      if (success) {
 
-            socket.emit('permit', { permission, token })
-            // sync the connecting client
-            socket.emit('downstream', store.data)
-            process.stdout.write(`[${AUTHORIZATION}][${Date()}] ${username} is authorized.\n`)
+        socket.emit('permit', true)
+        // sync the connecting client
+        socket.emit('downstream', store.data)
+        process.stdout.write(`[${AUTHORIZATION}][${Date()}] ${username} is authorized.\n`)
 
-            // reflect the connecting client's state to all
-            socket.on('upstream', data => {
-              process.stdout.write(`[${UPSTREAM}][${Date()}] ${username} upload ${JSON.stringify(data)}.\n`)
-              store.data = { ...store.data, ...data }
-              socket.broadcast.emit('downstream', data)
-              process.stdout.write(`[${DOWNSTREAM}][${Date()}] system is broadcasting ${JSON.stringify(data)}\n`)
-            })
-
-            socket.on('disconnect', () => {
-              process.stdout.write(`[${CONNECTION}][${Date()}] ${username} is disconnected.\n`)
-            })
-
-          } else {
-            socket.emit('permit', false)
-            socket.disconnect()
-            process.stdout.write(`[${AUTHORIZATION}][${Date()}] ${username} is not authorized.\n`)
-            process.stdout.write(`[${CONNECTION}][${Date()}] ${username} is disconnected.\n`)
-          }
+        // reflect the connecting client's state to all
+        socket.on('upstream', data => {
+          process.stdout.write(`[${UPSTREAM}][${Date()}] ${username} upload ${JSON.stringify(data)}.\n`)
+          store.data = { ...store.data, ...data }
+          socket.broadcast.emit('downstream', data)
+          process.stdout.write(`[${DOWNSTREAM}][${Date()}] system is broadcasting ${JSON.stringify(data)}\n`)
         })
+
+        socket.on('disconnect', () => {
+          process.stdout.write(`[${CONNECTION}][${Date()}] ${username} is disconnected.\n`)
+        })
+
+      } else {
+        socket.emit('permit', false)
+        socket.disconnect()
+        process.stdout.write(`[${AUTHORIZATION}][${Date()}] ${username} is not authorized.\n`)
+        process.stdout.write(`[${CONNECTION}][${Date()}] ${username} is disconnected.\n`)
+      }
+
     })
   })

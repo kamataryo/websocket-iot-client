@@ -1,25 +1,89 @@
 import React, { Component } from 'react'
+import { connect }          from 'react-redux'
 import PropTypes            from 'prop-types'
-import update               from 'immutability-helper'
 import RaisedButton         from 'material-ui/RaisedButton'
 import TextField            from 'material-ui/TextField'
+import io                   from 'socket.io-client'
 
-import config from '../config'
+const ERRORs = {
+  AUTH_ERROR: '認証に失敗しました',
+  CONN_ERROR: 'サーバーとの接続に失敗しました',
+}
 
-// parse constants
-const STATUS_TYPES = Object.keys(config.StatusTypes)
+/**
+ * mapStateToProps
+ * @param  {State} state State
+ * @return {Props}       mapping props
+ */
+const mapStateToProps = state => ({
+  endpoint : state.endpoint,
+  username : state.username,
+  password : state.password,
+  error    : state.error,
+})
 
-const {
-  StatusTypes : {
-    AUTH_REQUIRED,
-    CONNECTION_FAILED,
-    IS_LOADING,
-    IS_LOGGED_IN,
+/**
+ * mapDispatchToProps
+ * @param  {Dispatch} dispatch dispatcher
+ * @return {Props}             Mapping props
+ */
+const mapDispatchToProps = dispatch => ({
+  connect: ({ endpoint, username, password }) => {
+
+    const socket = io.connect(endpoint)
+    socket.on('connect', () => {
+
+      // try auth
+      socket.emit('auth', { username, password })
+
+      // add Event Listener on authentication success/failure
+      socket.on('permit', success => {
+        if (success) {
+          // login
+          dispatch({
+            type: 'LOGIN',
+            payload: { login: true }
+          })
+
+          // this client doesn't need permitation from now
+          socket.off('permit')
+
+          // add Event Listener of downstream
+          socket.on('downstream', buttonState => {
+            dispatch({
+              type: 'UPDATE_BUTTON_STATE',
+              payload: { buttonState }
+            })
+          })
+
+          // add Event Listener of upstream as callback
+          dispatch({
+            type: 'SET_UPSTREAM_CALLBACK',
+            payload: { callback: buttonState => {
+              socket.emit('upstream', buttonState)
+              dispatch({ type: 'UPDATE_BUTTON_STATE', payload: { buttonState } })
+            } }
+          })
+
+        } else {
+          // auth failed and close connection
+          socket.disconnect()
+          dispatch({ type: 'UPDATE_PARAMS', payload: { error: 'AUTH_ERROR' } })
+        }
+      })
+    })
+
+    socket.on('connect_error', () => {
+      socket.disconnect()
+      dispatch({ type: 'UPDATE_PARAMS', payload: { error: 'CONN_ERROR' } })
+    })
+
   },
-  DEFAULT_ENDPOINT
-} = config
+  updateParams: kvs => dispatch({ type: 'UPDATE_PARAMS', payload: kvs }),
+})
 
 
+@connect(mapStateToProps, mapDispatchToProps)
 /**
  * LoginView
  * @return {ReactComponent} login view
@@ -27,88 +91,37 @@ const {
 export default class LoginView extends Component {
 
   static PropTypes = {
-    isError    : PropTypes.bool,
-    message    : PropTypes.string,
-    statusType : PropTypes.oneOf(STATUS_TYPES),
-    endpoint   : PropTypes.endpoint,
-    username   : PropTypes.string,
+    endpoint     : PropTypes.string,
+    username     : PropTypes.string,
+    password     : PropTypes.string,
+    connect      : PropTypes.func.isRequired,
+    error        : PropTypes.oneOfType([
+      PropTypes.bool,
+      PropTypes.oneOf(Object.keys(ERRORs)),
+    ]),
+    updateParams : PropTypes.func.isRequried
   }
 
   static defaultProps = {
-    isError    : false,
-    message    : '',
-    statusType : IS_LOADING,
-    endpoint   : DEFAULT_ENDPOINT,
-    username   : '',
+    endpoint : '',
+    username : '',
+    password : '',
+    error    : false,
   }
 
   /**
-   * [constructor description]
-   * @param {Props} props Props
-   * @return {void}
-   */
-  // constructor(props) {
-  //   super(props)
-  //   this.state = {
-  //     username         : this.props.username,
-  //     endpoint         : 'http://localhost:3000',
-  //     password         : '',
-  //     authFailed       : undefined,
-  //     connectionFailed : undefined
-  //   }
-  // }
-
-  /**
-   * create callback to update Certification infomation
-   * @param  {string} param username, endpoint, password
-   * @return {void}
-   */
-  // updateCertification(param) {
-  //   return (e, value) => this.setState(update(this.state, { [param]: { $set: value } }))
-  // }
-
-  /**
-   * [tryConnect description]
-   * @return {void} [description]
-   */
-  // tryConnect = () => {
-  //   const socket = io.connect(this.state.endpoint)
-  //   socket
-  //     .on('connect', () => {
-  //       // try authentication
-  //       socket.emit('auth', {
-  //         username: this.state.username,
-  //         password: this.state.password
-  //       })
-  //       // wait response
-  //       socket.on('permit', permitted => {
-  //         if (permitted) {
-  //           this.props.onConnect(socket, permitted)
-  //         }
-  //         this.setState(update(this.state, {
-  //           authFailed       : { $set: !permitted },
-  //           connectionFailed : { $set: false },
-  //         }))
-  //       })
-  //     })
-  //     .on('connect_error', () => {
-  //       this.setState(update(this.state, { connectionFailed: { $set: true } }))
-  //       socket.disconnect()
-  //     })
-  // }
-
-  /**
-   * [render description]
+   * render login view
    * @return {void}
    */
   render() {
 
-    const {
-      isError,
-      message,
-      statusType,
+    const  {
       endpoint,
       username,
+      password,
+      connect,
+      error,
+      updateParams,
     } = this.props
 
     return (
@@ -117,33 +130,35 @@ export default class LoginView extends Component {
         <div className={ 'margin-one-half' }>
 
           <TextField
-            errorText={ this.state.connectionFailed === true ? 'エンドポイントとの接続に失敗しました。URLが間違っているか、サーバーが死んだのでしょう' : false }
+            errorText={ error === 'CONN_ERROR' ? '接続できませんでした' : false }
             hintText={ 'Socket.IO Endpoint URL' }
-            value={ this.props.endpoint }
-            onChange={ this.updateCertification('endpoint') }
-            onFocus={ () => this.setState(update(this.state, { connectionFailed: { $set: undefined } })) }
+            value={ endpoint }
+            onChange={ e => updateParams({ endpoint : e.target.value }) }
+            onFocus={ () => updateParams({ error    : false }) }
           />
 
           <TextField
-            errorText={ this.state.authFailed === true ? 'ユーザー名が間違っているかもしれません' : false }
+            errorText={ error === 'AUTH_ERROR' ? '認証に失敗しました' : false }
             hintText={ 'username' }
-            onChange={ this.updateCertification('username') }
-            onFocus={ () => this.setState(update(this.state, { authFailed: { $set: undefined } })) }
+            value={ username }
+            onChange={ e => updateParams({ username : e.target.value }) }
+            onFocus={ () => updateParams({ error    : false }) }
           />
 
           <TextField
-            errorText={ this.state.authFailed === true ? 'パスワードが間違っているかもしれません' : false }
+            errorText={ error === 'AUTH_ERROR' ? '認証に失敗しました' : false }
             hintText={ 'password' }
             type={ 'password' }
-            onChange={ this.updateCertification('password') }
-            onFocus={ () => this.setState(update(this.state, { authFailed: { $set: undefined } })) }
+            value={ password }
+            onChange={ e => updateParams({ password : e.target.value }) }
+            onFocus={ () => updateParams({ error    : false }) }
           />
         </div>
 
         <RaisedButton
           label={ 'LOGIN' }
           primary
-          onTouchTap={ this.tryConnect }
+          onTouchTap={ () => connect({ endpoint, username, password }) }
         />
 
       </section>
