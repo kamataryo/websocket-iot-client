@@ -44,7 +44,7 @@ export default class ControllerView extends Component {
         <Toggle
           className={ 'margin-one-half ' }
           label={ 'トグル' }
-          toggled={ buttonState.toggle }
+          toggled={ buttonState.toggle || false }
           onToggle={ (e, value) => buttonUpdate({ toggle: value }) }
         />
 
@@ -68,7 +68,7 @@ export default class ControllerView extends Component {
         <RadioButtonGroup
           className={ 'margin-one-half radios' }
           name={ 'radio' }
-          valueSelected={ buttonState.radio }
+          valueSelected={ buttonState.radio || false }
           onChange={ (e, value) => buttonUpdate({ radio: value }) }
         >
           <RadioButton
