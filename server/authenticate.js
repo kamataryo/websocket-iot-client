@@ -21,7 +21,11 @@ export default ({ username, password, token }) => {
   } else {
     return {
       success: username === password && username !== '',
-      token: jwt.sign({ username }, privateKey)
+      token: jwt.sign(
+        { username },
+        privateKey,
+        { expiresIn: '10d' }
+      )
     }
   }
 }

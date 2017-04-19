@@ -124,6 +124,7 @@ const mapDispatchToProps = dispatch => ({
 
     // maybe serverside panic
     socket.on('disconnect', () => {
+      socket.disconnect()
       dispatch({ type: 'UPDATE_PARAMS', payload: { error: 'CONN_ERROR' } })
       dispatch({ type: 'LOGIN', payload: { login: false } })
       dispatch({ type: 'DISPLAY_LOADING', payload: { loading: false } })
@@ -170,24 +171,25 @@ export default class LoginView extends Component {
   }
 
   /**
-   * componentDidMount
+   * componentWillMount
    * @return {void}
    */
-  componentDidMount() {
-
+  componentWillMount() {
     const token = localStorage.getItem(ACCESS_TOKEN)
     if (token) {
-      // display loading
-      this.props.startLoad()
-      this.props.updateParams({
-        username: 'automatically logging in...',
-        password: 'xxxxxxxxxxxxxxxx' // simply put a place holder
-      })
-      this.props.connect({
-        token,
-        endpoint     : this.props.endpoint,
-        enableLocalStorage : true,
-      })
+      if (this.props.error) {
+        // token should be revoked
+        this.props.updateParams({ error: false })
+        localStorage.removeItem(ACCESS_TOKEN)
+      } else {
+        // display loading
+        this.props.startLoad()
+        this.props.connect({
+          token,
+          endpoint           : this.props.endpoint,
+          enableLocalStorage : true,
+        })
+      }
     }
   }
 
