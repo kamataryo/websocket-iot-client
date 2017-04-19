@@ -9,6 +9,7 @@ const initialState = {
   enableCookie : false,
   buttonState  : {},
   callbacks    : {},
+  isLoading    : false,
   isLoggedIn   : false,
 }
 
@@ -19,6 +20,10 @@ export default (state = initialState, action) => {
     case 'LOGIN':
       const { login } = action.payload
       return update(state, { isLoggedIn: { $set : login } })
+
+    case 'DISPLAY_LOADING':
+      const { loading } = action.payload
+      return update(state, { isLoading: { $set: loading } })
 
     case 'UPDATE_PARAMS':
       const kvs = action.payload

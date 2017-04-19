@@ -41,13 +41,15 @@ socketIO
     // authenticate on connection
     socket.on('auth', data => {
 
-      const username = data.username
+      let username = data.username || 'unknown'
 
       process.stdout.write(`[${CONNECTION}][${Date()}] ${username} is connected.\n`)
 
-      const { success, token } = authenticate(data)
+      const { success, token, authuser } = authenticate(data)
 
       if (success) {
+        // overwrite
+        username = authuser || username
 
         socket.emit('permit', { permission: true, token })
         // sync the connecting client

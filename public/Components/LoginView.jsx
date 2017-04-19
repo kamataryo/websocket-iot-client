@@ -33,7 +33,14 @@ const mapStateToProps = state => ({
  * @return {Props}             Mapping props
  */
 const mapDispatchToProps = dispatch => ({
+
+  startLoad  : () => dispatch({ type: 'DISPLAY_LOADING', payload: { loading: true } }),
+
+  updateParams: kvs => dispatch({ type: 'UPDATE_PARAMS', payload: kvs }),
+
   connect: ({ endpoint, username, password, token, enableCookie }) => {
+
+    dispatch({ type: 'DISPLAY_LOADING', payload: { loading: true } })
 
     const socket = io.connect(endpoint)
     socket.on('connect', () => {
@@ -88,30 +95,42 @@ const mapDispatchToProps = dispatch => ({
               name: 'logout',
               callback: () => {
                 cookie.remove(ACCESS_TOKEN)
-                // clean up username and password
-                dispatch({ type: 'UPDATE_PARAMS', payload: { username: '', password: '' } })
                 // do logout
                 dispatch({ type: 'LOGIN', payload: { login: false } })
               }
             }
           })
 
+          // disable loading display
+          setTimeout(() => {
+            dispatch({ type: 'DISPLAY_LOADING', payload: { loading: false } })
+          }, enableCookie ? 500 : 700)
 
         } else {
+          // remove unnecessary event handler for safety
+          socket.off('disconnect')
           // auth failed and close connection
           socket.disconnect()
           dispatch({ type: 'UPDATE_PARAMS', payload: { error: 'AUTH_ERROR' } })
+          dispatch({ type: 'DISPLAY_LOADING', payload: { loading: false } })
         }
       })
+    })
+
+    // maybe serverside panic
+    socket.on('disconnect', () => {
+      dispatch({ type: 'UPDATE_PARAMS', payload: { error: 'CONN_ERROR' } })
+      dispatch({ type: 'LOGIN', payload: { login: false } })
+      dispatch({ type: 'DISPLAY_LOADING', payload: { loading: false } })
     })
 
     socket.on('connect_error', () => {
       socket.disconnect()
       dispatch({ type: 'UPDATE_PARAMS', payload: { error: 'CONN_ERROR' } })
+      dispatch({ type: 'DISPLAY_LOADING', payload: { loading: false } })
     })
 
   },
-  updateParams: kvs => dispatch({ type: 'UPDATE_PARAMS', payload: kvs }),
 })
 
 
@@ -132,6 +151,8 @@ export default class LoginView extends Component {
       PropTypes.oneOf(Object.keys(ERRORs)),
     ]),
     updateParams : PropTypes.func.isRequried,
+    startLoad    : PropTypes.func.isRequired,
+    finishLoad   : PropTypes.func.isRequired,
     enableCookie : PropTypes.bool.isRequired,
   }
 
@@ -151,9 +172,11 @@ export default class LoginView extends Component {
 
     const token = cookie.load(ACCESS_TOKEN)
     if (token) {
+      // display loading
+      this.props.startLoad()
       this.props.updateParams({
         username: 'automatically logging in...',
-        password: 'xxxxxxxxxxxxxxxx' // simply place holder
+        password: 'xxxxxxxxxxxxxxxx' // simply put a place holder
       })
       this.props.connect({
         token,

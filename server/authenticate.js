@@ -3,8 +3,9 @@ import jwt from 'jsonwebtoken'
 
 export default ({ username, password, token }) => {
   if (token) {
+    let username
     try {
-      jwt.verify(token, 'some privata key')
+      username = jwt.verify(token, 'some privata key').username
     } catch (e) {
       return {
         success: false
@@ -13,6 +14,7 @@ export default ({ username, password, token }) => {
     return {
       success: true,
       token: token,
+      authuser: username,
     }
   } else {
     return {

@@ -24,3 +24,7 @@ body, label {
 .radios svg {
   color: #666;
 }
+
+.wrap-loading {
+  height: 500px;
+}
