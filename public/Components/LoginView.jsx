@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import { connect }          from 'react-redux'
-import cookie               from 'react-cookie'
 import PropTypes            from 'prop-types'
 import RaisedButton         from 'material-ui/RaisedButton'
 import Checkbox             from 'material-ui/Checkbox'
@@ -24,7 +23,7 @@ const mapStateToProps = state => ({
   username     : state.username,
   password     : state.password,
   error        : state.error,
-  enableCookie : state.enableCookie,
+  enableLocalStorage : state.enableLocalStorage,
 })
 
 /**
@@ -38,9 +37,15 @@ const mapDispatchToProps = dispatch => ({
 
   updateParams: kvs => dispatch({ type: 'UPDATE_PARAMS', payload: kvs }),
 
-  connect: ({ endpoint, username, password, token, enableCookie }) => {
+  connect: ({ endpoint, username, password, token, enableLocalStorage }) => {
 
+    // display loading
     dispatch({ type: 'DISPLAY_LOADING', payload: { loading: true } })
+
+    // initialize local storage
+    if (!enableLocalStorage) {
+      localStorage.clear()
+    }
 
     const socket = io.connect(endpoint)
     socket.on('connect', () => {
@@ -51,9 +56,9 @@ const mapDispatchToProps = dispatch => ({
       // add Event Listener on authentication success/failure
       socket.on('permit', ({ permission, token }) => {
         if (permission) {
-          // save token as a cookie
-          if (enableCookie) {
-            cookie.save(ACCESS_TOKEN, token)
+          // save token in local storage
+          if (enableLocalStorage) {
+            localStorage.setItem(ACCESS_TOKEN, token)
           }
 
           // login
@@ -94,7 +99,7 @@ const mapDispatchToProps = dispatch => ({
             payload: {
               name: 'logout',
               callback: () => {
-                cookie.remove(ACCESS_TOKEN)
+                localStorage.removeItem(ACCESS_TOKEN)
                 // do logout
                 dispatch({ type: 'LOGIN', payload: { login: false } })
               }
@@ -104,7 +109,7 @@ const mapDispatchToProps = dispatch => ({
           // disable loading display
           setTimeout(() => {
             dispatch({ type: 'DISPLAY_LOADING', payload: { loading: false } })
-          }, enableCookie ? 500 : 700)
+          }, enableLocalStorage ? 500 : 700)
 
         } else {
           // remove unnecessary event handler for safety
@@ -153,7 +158,7 @@ export default class LoginView extends Component {
     updateParams : PropTypes.func.isRequried,
     startLoad    : PropTypes.func.isRequired,
     finishLoad   : PropTypes.func.isRequired,
-    enableCookie : PropTypes.bool.isRequired,
+    enableLocalStorage : PropTypes.bool.isRequired,
   }
 
   static defaultProps = {
@@ -161,7 +166,7 @@ export default class LoginView extends Component {
     username     : '',
     password     : '',
     error        : false,
-    enableCookie : false,
+    enableLocalStorage : false,
   }
 
   /**
@@ -170,7 +175,7 @@ export default class LoginView extends Component {
    */
   componentDidMount() {
 
-    const token = cookie.load(ACCESS_TOKEN)
+    const token = localStorage.getItem(ACCESS_TOKEN)
     if (token) {
       // display loading
       this.props.startLoad()
@@ -181,7 +186,7 @@ export default class LoginView extends Component {
       this.props.connect({
         token,
         endpoint     : this.props.endpoint,
-        enableCookie : true,
+        enableLocalStorage : true,
       })
     }
   }
@@ -198,7 +203,7 @@ export default class LoginView extends Component {
       password,
       connect,
       error,
-      enableCookie,
+      enableLocalStorage,
       updateParams,
     } = this.props
 
@@ -234,16 +239,16 @@ export default class LoginView extends Component {
         </div>
 
         <Checkbox
-          checked={ enableCookie }
+          checked={ enableLocalStorage }
           className={ 'margin-one-half' }
           label={ '自動でログインする' }
-          onCheck={ (e, value) => updateParams({ enableCookie: value }) }
+          onCheck={ (e, value) => updateParams({ enableLocalStorage: value }) }
         />
 
         <RaisedButton
           label={ 'LOGIN' }
           primary
-          onTouchTap={ () => connect({ endpoint, username, password, enableCookie }) }
+          onTouchTap={ () => connect({ endpoint, username, password, enableLocalStorage }) }
         />
 
       </section>

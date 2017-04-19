@@ -2,15 +2,15 @@ import update from 'immutability-helper'
 
 
 const initialState = {
-  endpoint     : 'http://localhost:3000',
-  username     : '',
-  password     : '',
-  error        : false,
-  enableCookie : false,
-  buttonState  : {},
-  callbacks    : {},
-  isLoading    : false,
-  isLoggedIn   : false,
+  endpoint           : 'http://localhost:3000',
+  username           : '',
+  password           : '',
+  error              : false,
+  enableLocalStorage : false,
+  buttonState        : {},
+  callbacks          : {},
+  isLoading          : false,
+  isLoggedIn         : false,
 }
 
 export default (state = initialState, action) => {
@@ -28,7 +28,7 @@ export default (state = initialState, action) => {
     case 'UPDATE_PARAMS':
       const kvs = action.payload
       const paramUpdator = Object.keys(kvs)
-        .filter(key => ['username', 'password', 'endpoint', 'error', 'enableCookie'].includes(key))
+        .filter(key => ['username', 'password', 'endpoint', 'error', 'enableLocalStorage'].includes(key))
         .reduce((prev, key) => {
           const value = kvs[key]
           prev[key] = { $set: value }
