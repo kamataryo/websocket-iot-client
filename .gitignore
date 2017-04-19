@@ -2,3 +2,5 @@
 /lib
 *.log
 /public/bundle.js*
+id_ecdsa
+id_ecdsa.pub
