@@ -139,7 +139,6 @@ const mapDispatchToProps = dispatch => ({
   },
 })
 
-
 @connect(mapStateToProps, mapDispatchToProps)
 /**
  * LoginView
@@ -210,50 +209,53 @@ export default class LoginView extends Component {
     } = this.props
 
     return (
-      <section className={ 'login' }>
+      <div>
+        <section className={ 'login' }>
 
-        <div className={ 'margin-one-half' }>
+          <div className={ 'margin-one-half' }>
 
-          <TextField
-            errorText={ error === 'CONN_ERROR' ? '接続できませんでした' : false }
-            hintText={ 'Socket.IO Endpoint URL' }
-            value={ endpoint }
-            onChange={ e => updateParams({ endpoint : e.target.value }) }
-            onFocus={ () => updateParams({ error    : false }) }
+            <TextField
+              errorText={ error === 'CONN_ERROR' ? '接続できませんでした' : false }
+              hintText={ 'Socket.IO Endpoint URL' }
+              value={ endpoint }
+              onChange={ e => updateParams({ endpoint : e.target.value }) }
+              onFocus={ () => updateParams({ error    : false }) }
+            />
+
+            <TextField
+              errorText={ error === 'AUTH_ERROR' ? '認証に失敗しました' : false }
+              hintText={ 'username' }
+              value={ username }
+              onChange={ e => updateParams({ username : e.target.value }) }
+              onFocus={ () => updateParams({ error    : false }) }
+            />
+
+            <TextField
+              errorText={ error === 'AUTH_ERROR' ? '認証に失敗しました' : false }
+              hintText={ 'password' }
+              type={ 'password' }
+              value={ password }
+              onChange={ e => updateParams({ password : e.target.value }) }
+              onFocus={ () => updateParams({ error    : false }) }
+            />
+          </div>
+
+          <Checkbox
+            checked={ enableLocalStorage }
+            className={ 'margin-one-half' }
+            label={ '自動でログインする' }
+            onCheck={ (e, value) => updateParams({ enableLocalStorage: value }) }
           />
 
-          <TextField
-            errorText={ error === 'AUTH_ERROR' ? '認証に失敗しました' : false }
-            hintText={ 'username' }
-            value={ username }
-            onChange={ e => updateParams({ username : e.target.value }) }
-            onFocus={ () => updateParams({ error    : false }) }
+          <RaisedButton
+            label={ 'LOGIN' }
+            primary
+            onTouchTap={ () => connect({ endpoint, username, password, enableLocalStorage }) }
           />
 
-          <TextField
-            errorText={ error === 'AUTH_ERROR' ? '認証に失敗しました' : false }
-            hintText={ 'password' }
-            type={ 'password' }
-            value={ password }
-            onChange={ e => updateParams({ password : e.target.value }) }
-            onFocus={ () => updateParams({ error    : false }) }
-          />
-        </div>
+        </section>
 
-        <Checkbox
-          checked={ enableLocalStorage }
-          className={ 'margin-one-half' }
-          label={ '自動でログインする' }
-          onCheck={ (e, value) => updateParams({ enableLocalStorage: value }) }
-        />
-
-        <RaisedButton
-          label={ 'LOGIN' }
-          primary
-          onTouchTap={ () => connect({ endpoint, username, password, enableLocalStorage }) }
-        />
-
-      </section>
+      </div>
     )
   }
 }
