@@ -1,6 +1,14 @@
+# build files
 /node_modules
 /lib
-*.log
 /public/bundle.js*
+
+# logs
+*.log
+
+# key pairs
 id_ecdsa
 id_ecdsa.pub
+
+# developmental mongoDB dbpath
+/db
