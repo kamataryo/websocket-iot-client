@@ -5,11 +5,10 @@
   "main": "index.js",
   "scripts": {
     "install": "./bin/keygen.sh -y",
-    "keygen": "./bin/keygen.sh",
-    "build": "NODE_ENV=production babel ./server --out-dir ./lib --source-maps inline",
-    "start": "webpack-dev-server --progress --colors --hot --inline --watch & PS=$! & npm run build && nodemon ./lib/index.js && kill $PS",
+    "start": "./bin/start.sh",
     "lint": "eslint . --ext=js --ext=jsx",
-    "test": "ava"
+    "test": "ava",
+    "build": "NODE_ENV=production babel ./server --out-dir ./lib --source-maps inline"
   },
   "ava": {
     "files": [
@@ -35,6 +34,9 @@
     "immutability-helper": "^2.1.2",
     "jsonwebtoken": "^7.3.0",
     "material-ui": "^0.17.4",
+    "mongodb": "^2.2.26",
+    "mongoose": "^4.9.5",
+    "morgan": "^1.8.1",
     "pify": "^2.3.0",
     "prop-types": "^15.5.8",
     "react": "^15.5.4",
