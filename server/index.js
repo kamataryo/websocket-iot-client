@@ -1,9 +1,10 @@
 import express  from 'express'
 import http     from 'http'
+import mongoose from 'mongoose'
 import socketIO from 'socket.io'
 import { yellow, red, blue, green } from 'chalk'
-
 import authenticate from './authenticate'
+import config from './config'
 
 /**
  * log headers
@@ -13,9 +14,6 @@ const UPSTREAM      = blue('UPSTREAM')
 const DOWNSTREAM    = green('DOWNSTREAM')
 const CONNECTION    = yellow('CONNECTION')
 const AUTHORIZATION = red('AUTHORIZATION')
-
-const app = express()
-
 const PORT = process.env.PORT || 3000
 
 
@@ -25,15 +23,25 @@ const PORT = process.env.PORT || 3000
  */
 const store = { data: {} }
 
+// web server
+const app = express()
 const server = http.createServer(app)
-
 server.listen(PORT, () => process.stdout.write(`WebSocket Server is listening on *:${PORT}\n`))
-
 app.use((req, res, next) => {
   process.stdout.write('error')
   next()
 })
 
+// db
+try {
+  mongoose.connect(`mongodb://${config.mongo.dbhost}:${config.mongo.dbport}/${config.mongo.dbname}`)
+} catch (e) {
+  process.stderr.write('Error in DB connection.')
+  process.stderr.write(e)
+  process.exit(1)
+}
+
+// socket IO handling
 socketIO
   .listen(server)
   .sockets.on('connection', socket => {
@@ -45,35 +53,37 @@ socketIO
 
       process.stdout.write(`[${CONNECTION}][${Date()}] ${username} is connected.\n`)
 
-      const { success, token, authuser } = authenticate(data)
+      authenticate(data, (err, { success, token, authuser }) => {
 
-      if (success) {
-        // overwrite
-        username = authuser || username
+        if (success) {
+          // overwrite
+          username = authuser || username
 
-        socket.emit('permit', { permission: true, token })
-        // sync the connecting client
-        socket.emit('downstream', store.data)
-        process.stdout.write(`[${AUTHORIZATION}][${Date()}] ${username} is authorized.\n`)
+          socket.emit('permit', { permission: true, token })
+          // sync the connecting client
+          socket.emit('downstream', store.data)
+          process.stdout.write(`[${AUTHORIZATION}][${Date()}] ${username} is authorized.\n`)
 
-        // reflect the connecting client's state to all
-        socket.on('upstream', data => {
-          process.stdout.write(`[${UPSTREAM}][${Date()}] ${username} upload ${JSON.stringify(data)}.\n`)
-          store.data = { ...store.data, ...data }
-          socket.broadcast.emit('downstream', data)
-          process.stdout.write(`[${DOWNSTREAM}][${Date()}] system is broadcasting ${JSON.stringify(data)}\n`)
-        })
+          // reflect the connecting client's state to all
+          socket.on('upstream', data => {
+            process.stdout.write(`[${UPSTREAM}][${Date()}] ${username} upload ${JSON.stringify(data)}.\n`)
+            store.data = { ...store.data, ...data }
+            socket.broadcast.emit('downstream', data)
+            process.stdout.write(`[${DOWNSTREAM}][${Date()}] system is broadcasting ${JSON.stringify(data)}\n`)
+          })
 
-        socket.on('disconnect', () => {
+          socket.on('disconnect', () => {
+            process.stdout.write(`[${CONNECTION}][${Date()}] ${username} is disconnected.\n`)
+          })
+
+        } else {
+          socket.emit('permit', false)
+          socket.disconnect()
+          process.stdout.write(`[${AUTHORIZATION}][${Date()}] ${username} is not authorized.\n`)
           process.stdout.write(`[${CONNECTION}][${Date()}] ${username} is disconnected.\n`)
-        })
+        }
 
-      } else {
-        socket.emit('permit', false)
-        socket.disconnect()
-        process.stdout.write(`[${AUTHORIZATION}][${Date()}] ${username} is not authorized.\n`)
-        process.stdout.write(`[${CONNECTION}][${Date()}] ${username} is disconnected.\n`)
-      }
+      })
 
     })
   })

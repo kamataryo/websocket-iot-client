@@ -5,11 +5,10 @@
   "main": "index.js",
   "scripts": {
     "install": "./bin/keygen.sh -y",
-    "keygen": "./bin/keygen.sh",
-    "build": "NODE_ENV=production babel ./server --out-dir ./lib --source-maps inline",
     "start": "./bin/start.sh",
     "lint": "eslint . --ext=js --ext=jsx",
-    "test": "ava"
+    "test": "ava",
+    "build": "NODE_ENV=production babel ./server --out-dir ./lib --source-maps inline"
   },
   "ava": {
     "files": [
