@@ -2,7 +2,7 @@ import update from 'immutability-helper'
 
 
 const initialState = {
-  endpoint           : 'http://localhost:3000',
+  endpoint           : 'http://localhost:3001',
   username           : '',
   password           : '',
   error              : false,

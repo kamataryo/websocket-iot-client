@@ -14,7 +14,7 @@ const UPSTREAM      = blue('UPSTREAM')
 const DOWNSTREAM    = green('DOWNSTREAM')
 const CONNECTION    = yellow('CONNECTION')
 const AUTHORIZATION = red('AUTHORIZATION')
-const PORT = process.env.PORT || 3000
+const PORT = process.env.PORT || 3001
 
 
 /**

@@ -3,8 +3,8 @@
    expiresIn: '10d',
 
    mongo: {
-     dbname : 'WebSocketIoTUI',
+     dbname : 'WebSocket-IoT-UI',
      dbhost : 'localhost',
-     dbport : '27017',
+     dbport : 27017,
    }
  }

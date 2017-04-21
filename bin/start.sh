@@ -3,12 +3,13 @@
 # start developmental environment
 
 DB_PATH=./db
+DB_PORT=27017
 LOCAL_BIN=./node_modules/.bin
 
 # start DB
 [[ -d $DB_PATH ]] && rm -rf $DB_PATH
 mkdir $DB_PATH
-mongod --dbpath=$DB_PATH &
+mongod --dbpath="$DB_PATH" --port="$DB_PORT" &
 PS1=$!
 
 # start client
@@ -17,7 +18,8 @@ PS2=$!
 
 # wait mongo start
 COUNTER=0
-while [[ ! $(mongo --eval 'db.version') ]]; do
+COMMAND="db.version()"
+while [[ ! $(mongo --eval $COMMAND) ]]; do
   if [[ $COUNTER -gt 100 ]]; then
     # kill all related process
     kill -9 $PS1
