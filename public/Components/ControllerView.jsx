@@ -3,10 +3,8 @@ import PropTypes            from 'prop-types'
 import { connect }          from 'react-redux'
 
 import Toggle       from 'material-ui/Toggle'
-import Slider       from 'material-ui/Slider'
 import RaisedButton from 'material-ui/RaisedButton'
 import Divider      from 'material-ui/Divider'
-import { RadioButton, RadioButtonGroup } from 'material-ui/RadioButton'
 
 /**
  * mapStateToProps
@@ -42,54 +40,52 @@ export default class ControllerView extends Component {
       <section className={ 'controls' }>
 
         <Toggle
-          className={ 'margin-one-half ' }
-          label={ 'トグル' }
-          toggled={ buttonState.toggle || false }
-          onToggle={ (e, value) => buttonUpdate({ toggle: value }) }
+          className={ 'margin-one-half' }
+          label={ 'スイッチ0' }
+          toggled={ buttonState.toggle0 || false }
+          onToggle={ (e, value) => buttonUpdate({ toggle0: value }) }
         />
 
         <Divider />
 
-        <div className={ 'margin-three' }>
-          <label htmlFor={ 'e' }>{ 'スライダー ' }<strong>{ buttonState.slider || ' ' }</strong></label>
-          <Slider
-            axis={ 'x' }
-            max={ 100 }
-            min={ 0 }
-            name={ 'slider' }
-            step={ 1 }
-            value={ buttonState.slider ? buttonState.slider : 0 }
-            onChange={ (e, value) => buttonUpdate({ slider: value }) }
+        <Toggle
+          className={ 'margin-one-half' }
+          label={ 'スイッチ1' }
+          toggled={ buttonState.toggle1 || false }
+          onToggle={ (e, value) => buttonUpdate({ toggle1: value }) }
+        />
+
+        <Divider />
+
+        <Toggle
+          className={ 'margin-one-half' }
+          label={ 'スイッチ2' }
+          toggled={ buttonState.toggle2 || false }
+          onToggle={ (e, value) => buttonUpdate({ toggle2: value }) }
+        />
+
+        <div>
+          <RaisedButton
+            label={ 'OFF' }
+            style={ { marginRight: 12 } }
+            primary
+            onTouchTap={ () => buttonUpdate({
+              toggle0: false,
+              toggle1: false,
+              toggle2: false,
+            }) }
+          />
+
+          <RaisedButton
+            label={ 'ON' }
+            primary
+            onTouchTap={ () => buttonUpdate({
+              toggle0: true,
+              toggle1: true,
+              toggle2: true,
+            }) }
           />
         </div>
-
-        <Divider />
-
-        <RadioButtonGroup
-          className={ 'margin-one-half radios' }
-          name={ 'radio' }
-          valueSelected={ buttonState.radio || false }
-          onChange={ (e, value) => buttonUpdate({ radio: value }) }
-        >
-          <RadioButton
-            label="ラジオ1"
-            value="radio1"
-          />
-          <RadioButton
-            label="ラジオ2"
-            value="radio2"
-          />
-          <RadioButton
-            label="ラジオ3"
-            value="radio3"
-          />
-        </RadioButtonGroup>
-
-        <RaisedButton
-          label={ 'OFF' }
-          primary
-          onTouchTap={ () => buttonUpdate({ toggle: false, slider: false, radio: false }) }
-        />
 
       </section>
     )

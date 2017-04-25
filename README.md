@@ -3,6 +3,7 @@
 [![Build Status](https://travis-ci.org/KamataRyo/websocket-iot-ui.svg?branch=master)](https://travis-ci.org/KamataRyo/websocket-iot-ui)
 
 This is an user interface based on Socket.IO, MongoDB, React and Material UI.
+Example UI works with RaspberryPi easy IoT home kit.
 
 ## Implicit dependency
 

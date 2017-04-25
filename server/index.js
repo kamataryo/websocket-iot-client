@@ -5,6 +5,7 @@ import socketIO from 'socket.io'
 import { yellow, red, blue, green } from 'chalk'
 import authenticate from './authenticate'
 import config from './config'
+import hooks from './hooks/index'
 
 /**
  * log headers
@@ -63,6 +64,8 @@ socketIO
           // sync the connecting client
           socket.emit('downstream', store.data)
           process.stdout.write(`[${AUTHORIZATION}][${Date()}] ${username} is authorized.\n`)
+          // exec init hook
+          hooks.init()
 
           // reflect the connecting client's state to all
           socket.on('upstream', data => {
@@ -70,10 +73,14 @@ socketIO
             store.data = { ...store.data, ...data }
             socket.broadcast.emit('downstream', data)
             process.stdout.write(`[${DOWNSTREAM}][${Date()}] system is broadcasting ${JSON.stringify(data)}\n`)
+            // exec change hook
+            Object.keys(data).forEach(key => hooks.changeOn(key, data[key])())
           })
 
           socket.on('disconnect', () => {
             process.stdout.write(`[${CONNECTION}][${Date()}] ${username} is disconnected.\n`)
+            // exec terminated hook
+            hooks.terminate()
           })
 
         } else {
