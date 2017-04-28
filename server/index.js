@@ -15,7 +15,7 @@ const UPSTREAM      = blue('UPSTREAM')
 const DOWNSTREAM    = green('DOWNSTREAM')
 const CONNECTION    = yellow('CONNECTION')
 const AUTHORIZATION = red('AUTHORIZATION')
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT || config.server.port
 
 
 /**
@@ -27,11 +27,15 @@ const store = { data: {} }
 // web server
 const app = express()
 const server = http.createServer(app)
-server.listen(PORT, () => process.stdout.write(`WebSocket Server is listening on *:${PORT}\n`))
-app.use((req, res, next) => {
-  process.stdout.write('error')
-  next()
-})
+
+server
+  .listen(PORT, () => process.stdout.write(`WebSocket Server is listening on *:${PORT}\n`))
+
+app
+  .use((req, res, next) => {
+    process.stdout.write('error')
+    next()
+  })
 
 // db
 try {
@@ -41,6 +45,8 @@ try {
   process.stderr.write(e)
   process.exit(1)
 }
+
+let connectCount = 0
 
 // socket IO handling
 socketIO
@@ -65,7 +71,9 @@ socketIO
           socket.emit('downstream', store.data)
           process.stdout.write(`[${AUTHORIZATION}][${Date()}] ${username} is authorized.\n`)
           // exec init hook
-          hooks.init()
+          if (connectCount++ + 1) { // check if you are the first
+            hooks.init()
+          }
 
           // reflect the connecting client's state to all
           socket.on('upstream', data => {
@@ -80,7 +88,9 @@ socketIO
           socket.on('disconnect', () => {
             process.stdout.write(`[${CONNECTION}][${Date()}] ${username} is disconnected.\n`)
             // exec terminated hook
-            hooks.terminate()
+            if (connectCount-- - 1) { // check if you are the first
+              hooks.terminate()
+            }
           })
 
         } else {

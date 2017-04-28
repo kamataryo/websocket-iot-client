@@ -7,6 +7,7 @@ import IconButton       from 'material-ui/IconButton'
 import ExitToApp        from 'material-ui/svg-icons/action/exit-to-app'
 import ControllerView   from './ControllerView.jsx'
 import LoginView        from './LoginView.jsx'
+import config           from '../config'
 
 /**
  * mapStateToProps
@@ -33,6 +34,21 @@ export default class App extends Component {
   }
 
   /**
+   * shouldComponentUpdate
+   * @param  {[type]} state State
+   * @return {boolean}      should component update
+   */
+  shouldComponentUpdate(state) {
+    const prev = { ...state }
+    if (!prev) {
+      return true
+    } else {
+
+    }
+    return prev
+  }
+
+  /**
    * Render
    * @return {ReactDomElement} React DOM Element
    */
@@ -49,7 +65,7 @@ export default class App extends Component {
           <main className={ 'main-contianer wrap-loading' }>
             <AppBar
               showMenuIconButton={ false }
-              title={ 'WebSocket IoT UI - Auto Login' }
+              title={ config.title + ' | logging in..' }
             />
             <CircularProgress
               size={ 40 }
@@ -64,7 +80,7 @@ export default class App extends Component {
               <AppBar
                 iconElementRight={ <IconButton tooltip={ 'logout' }><ExitToApp /></IconButton> }
                 showMenuIconButton={ false }
-                title={ 'WebSocket IoT UI - Controller' }
+                title={ config.title + ' | Controller' }
                 onRightIconButtonTouchTap={ logout }
               />
               <ControllerView />
@@ -73,7 +89,7 @@ export default class App extends Component {
             <main className={ 'main-contianer wrap-login' }>
               <AppBar
                 showMenuIconButton={ false }
-                title={ 'WebSocket IoT UI - Login' }
+                title={ config.title + '- Login' }
               />
               <LoginView />
             </main>
