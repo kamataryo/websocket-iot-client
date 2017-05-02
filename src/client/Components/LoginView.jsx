@@ -1,10 +1,13 @@
 import React, { Component } from 'react'
 import { connect }          from 'react-redux'
 import PropTypes            from 'prop-types'
-import RaisedButton         from 'material-ui/RaisedButton'
 import Checkbox             from 'material-ui/Checkbox'
+import CircularProgress     from 'material-ui/CircularProgress'
+import RaisedButton         from 'material-ui/RaisedButton'
 import TextField            from 'material-ui/TextField'
 import io                   from 'socket.io-client'
+import config               from '../config'
+import style                from '../style'
 
 const ERRORs = {
   AUTH_ERROR: '認証に失敗しました',
@@ -19,10 +22,11 @@ const ACCESS_TOKEN = 'access_token'
  * @return {Props}       mapping props
  */
 const mapStateToProps = state => ({
-  endpoint     : state.endpoint,
-  username     : state.username,
-  password     : state.password,
-  error        : state.error,
+  isLoading          : state.isLoading,
+  endpoint           : state.endpoint,
+  username           : state.username,
+  password           : state.password,
+  error              : state.error,
   enableLocalStorage : state.enableLocalStorage,
 })
 
@@ -32,16 +36,12 @@ const mapStateToProps = state => ({
  * @return {Props}             Mapping props
  */
 const mapDispatchToProps = dispatch => ({
+  startLoad    : () => dispatch({ type: 'DISPLAY_LOADING', payload: { loading: true } }),
+  updateParams : kvs => dispatch({ type: 'UPDATE_PARAMS', payload: kvs }),
 
-  startLoad  : () => dispatch({ type: 'DISPLAY_LOADING', payload: { loading: true } }),
-
-  updateParams: kvs => dispatch({ type: 'UPDATE_PARAMS', payload: kvs }),
-
-  connect: ({ endpoint, username, password, token, enableLocalStorage }) => {
-
+  connect      : ({ endpoint, username, password, token, enableLocalStorage }) => {
     // display loading
     dispatch({ type: 'DISPLAY_LOADING', payload: { loading: true } })
-
     // initialize local storage
     if (!enableLocalStorage) {
       localStorage.clear()
@@ -61,14 +61,14 @@ const mapDispatchToProps = dispatch => ({
             localStorage.setItem(ACCESS_TOKEN, token)
           }
 
-          // login
-          dispatch({
-            type: 'LOGIN',
-            payload: { login: true }
-          })
-
-          // clean up username and password
-          dispatch({ type: 'UPDATE_PARAMS', payload: { username: '', password: '' } })
+          setTimeout(() => {
+            // disable loading display
+            dispatch({ type: 'DISPLAY_LOADING', payload: { loading: false } })
+            // login
+            dispatch({ type: 'LOGIN', payload: { login: true } })
+            // clean up username and password
+            dispatch({ type: 'UPDATE_PARAMS', payload: { username: '', password: '' } })
+          }, config.loadingDelay)
 
           // this client doesn't need permitation from now
           socket.off('permit')
@@ -106,11 +106,6 @@ const mapDispatchToProps = dispatch => ({
             }
           })
 
-          // disable loading display
-          setTimeout(() => {
-            dispatch({ type: 'DISPLAY_LOADING', payload: { loading: false } })
-          }, enableLocalStorage ? 500 : 700)
-
         } else {
           // remove unnecessary event handler for safety
           socket.off('disconnect')
@@ -139,6 +134,10 @@ const mapDispatchToProps = dispatch => ({
   },
 })
 
+/**
+ * connect to redux
+ * @type {Decorator}
+ */
 @connect(mapStateToProps, mapDispatchToProps)
 /**
  * LoginView
@@ -147,6 +146,7 @@ const mapDispatchToProps = dispatch => ({
 export default class LoginView extends Component {
 
   static PropTypes = {
+    isLoading    : PropTypes.boolean,
     endpoint     : PropTypes.string,
     username     : PropTypes.string,
     password     : PropTypes.string,
@@ -162,6 +162,7 @@ export default class LoginView extends Component {
   }
 
   static defaultProps = {
+    isLoading    : false,
     endpoint     : '',
     username     : '',
     password     : '',
@@ -199,6 +200,7 @@ export default class LoginView extends Component {
   render() {
 
     const  {
+      isLoading,
       endpoint,
       username,
       password,
@@ -210,9 +212,9 @@ export default class LoginView extends Component {
 
     return (
       <div>
-        <section className={ 'login' }>
+        <section>
 
-          <div className={ 'margin-one-half' }>
+          <div style={ style.verticalMargin.x1 }>
 
             <TextField
               errorText={ error === 'CONN_ERROR' ? '接続できませんでした' : false }
@@ -220,7 +222,7 @@ export default class LoginView extends Component {
               value={ endpoint }
               onChange={ e => updateParams({ endpoint : e.target.value }) }
               onFocus={ () => updateParams({ error    : false }) }
-            />
+            /><br />
 
             <TextField
               errorText={ error === 'AUTH_ERROR' ? '認証に失敗しました' : false }
@@ -228,7 +230,7 @@ export default class LoginView extends Component {
               value={ username }
               onChange={ e => updateParams({ username : e.target.value }) }
               onFocus={ () => updateParams({ error    : false }) }
-            />
+            /><br />
 
             <TextField
               errorText={ error === 'AUTH_ERROR' ? '認証に失敗しました' : false }
@@ -237,13 +239,13 @@ export default class LoginView extends Component {
               value={ password }
               onChange={ e => updateParams({ password : e.target.value }) }
               onFocus={ () => updateParams({ error    : false }) }
-            />
+            /><br />
           </div>
 
           <Checkbox
             checked={ enableLocalStorage }
-            className={ 'margin-one-half' }
             label={ '自動でログインする' }
+            style={ style.verticalMargin.x1 }
             onCheck={ (e, value) => updateParams({ enableLocalStorage: value }) }
           />
 
@@ -252,6 +254,14 @@ export default class LoginView extends Component {
             primary
             onTouchTap={ () => connect({ endpoint, username, password, enableLocalStorage }) }
           />
+
+          { isLoading ?
+            <CircularProgress
+              size={ 30 }
+              style={ style.loading }
+              thickness={ 5 }
+            /> : null
+          }
 
         </section>
 

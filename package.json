@@ -8,8 +8,7 @@
     "start": "./bin/start.sh",
     "lint": "eslint . --ext=js --ext=jsx",
     "test": "ava",
-    "build": "./bin/build.sh",
-    "bundle": "browserify --node --external bufferutil --external utf-8-validate --entry ./server/index.js -t babelify -o lib/bunle.js"
+    "build": "./bin/build.sh"
   },
   "ava": {
     "files": [
@@ -66,6 +65,7 @@
     "eslint-plugin-import": "^2.2.0",
     "eslint-plugin-jsx-a11y": "^4.0.0",
     "eslint-plugin-react": "^6.10.3",
+    "html-webpack-plugin": "^2.28.0",
     "nodemon": "^1.11.0",
     "react-addons-test-utils": "^15.5.1",
     "react-test-renderer": "^15.5.4",

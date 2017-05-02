@@ -5,6 +5,7 @@ import { connect }          from 'react-redux'
 import Toggle       from 'material-ui/Toggle'
 import RaisedButton from 'material-ui/RaisedButton'
 import Divider      from 'material-ui/Divider'
+import style        from '../style'
 
 /**
  * mapStateToProps
@@ -16,6 +17,10 @@ const mapStateToProps = state => ({
   buttonUpdate : state.callbacks.emitUpstream
 })
 
+/**
+ * connect to redux
+ * @type {Decorator}
+ */
 @connect(mapStateToProps)
 /**
  * ControllerView
@@ -37,11 +42,11 @@ export default class ControllerView extends Component {
     const { buttonState, buttonUpdate } = this.props
 
     return (
-      <section className={ 'controls' }>
+      <section>
 
         <Toggle
-          className={ 'margin-one-half' }
           label={ 'スイッチ0' }
+          style={ style.verticalMargin.x1 }
           toggled={ buttonState.toggle0 || false }
           onToggle={ (e, value) => buttonUpdate({ toggle0: value }) }
         />
@@ -49,8 +54,8 @@ export default class ControllerView extends Component {
         <Divider />
 
         <Toggle
-          className={ 'margin-one-half' }
           label={ 'スイッチ1' }
+          style={ style.verticalMargin.x1 }
           toggled={ buttonState.toggle1 || false }
           onToggle={ (e, value) => buttonUpdate({ toggle1: value }) }
         />
@@ -58,8 +63,8 @@ export default class ControllerView extends Component {
         <Divider />
 
         <Toggle
-          className={ 'margin-one-half' }
           label={ 'スイッチ2' }
+          style={ style.verticalMargin.x1 }
           toggled={ buttonState.toggle2 || false }
           onToggle={ (e, value) => buttonUpdate({ toggle2: value }) }
         />

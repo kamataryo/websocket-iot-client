@@ -13,7 +13,7 @@ mongod --dbpath="$DB_PATH" --port="$DB_PORT" &
 PS1=$!
 
 # start client developing
-if [[ NODE_ENV != "prouction" ]]; then
+if [[ $NODE_ENV != 'prouction' ]]; then
   $LOCAL_BIN/webpack-dev-server --progress --colors --hot --inline --watch &
   PS2=$!
 fi
@@ -34,15 +34,15 @@ while [[ ! $(mongo --eval $COMMAND) ]]; do
 done
 
 # migrate
-$LOCAL_BIN/babel-node ./server/migrate/index.js
+$LOCAL_BIN/babel-node ./src/server/migrate/index.js
 
-if [[ NODE_ENV == 'production' ]]; then
+if [[ $NODE_ENV == 'production' ]]; then
   PORT=3000
   # start server as a process
-  PORT=3001 $LOCAL_BIN/forever start "node ./lib/index.js"
+  PORT=3001 $LOCAL_BIN/forever start "node ./dist/server/index.js"
 else
   # start dev server
-  $LOCAL_BIN/nodemon --exec "$LOCAL_BIN/babel-node" -- ./server/index.js
+  $LOCAL_BIN/nodemon --exec "$LOCAL_BIN/babel-node" -- ./src/server/index.js
   # kill all related process
   kill -9 $PS1
   kill -9 $PS2

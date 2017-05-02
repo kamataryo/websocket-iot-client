@@ -1,6 +1,6 @@
 # build files
 /node_modules
-/lib
+/dist
 /public/bundle.js*
 
 # logs

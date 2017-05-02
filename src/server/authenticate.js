@@ -3,8 +3,8 @@ import fs     from 'fs'
 import config from './config'
 import User   from './models/User'
 
-const privateKey = fs.readFileSync(__dirname + '/../id_ecdsa')
-
+const privateKey = fs.readFileSync(__dirname + '/../../id_ecdsa')
+console.log(privateKey)
 export default (data, callback) => {
 
   const { username, password, token } = data
