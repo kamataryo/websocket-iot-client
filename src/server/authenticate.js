@@ -4,7 +4,13 @@ import config from './config'
 import User   from './models/User'
 
 const privateKey = fs.readFileSync(__dirname + '/../../id_ecdsa')
-console.log(privateKey)
+
+/**
+ * do authentication
+ * @param  {{username:string,password:string,token:string}} data    data for authentication
+ * @param  {Function} callback callback after auth
+ * @return {object}            return result of callback
+ */
 export default (data, callback) => {
 
   const { username, password, token } = data
@@ -17,9 +23,9 @@ export default (data, callback) => {
         return resultIn(err, { success: false })
       } else {
         return resultIn(undefined, {
-          success: true,
-          token: token,
-          authuser: username,
+          success  : true,
+          token    : token,
+          authuser : username,
         })
       }
     })
@@ -31,7 +37,7 @@ export default (data, callback) => {
         return resultIn(undefined, {
           // NOTE: this is simply sample of the authentication
           // you should replace this.
-          success: docs.length === 1,
+          success: docs.length > 0,
           token: jwt.sign(
             { username },
             privateKey,

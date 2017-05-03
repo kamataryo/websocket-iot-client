@@ -33,8 +33,9 @@ export default {
     }),
   ],
   devServer: {
-    contentBase : path.join(__dirname, '/dist/client/'),
-    compress    : true,
-    port        : 3000,
+    contentBase        : path.join(__dirname, '/dist/client/'),
+    compress           : true,
+    port               : 3000,
+    historyApiFallback : true
   }
 }
