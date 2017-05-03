@@ -107,17 +107,12 @@
     "react/jsx-indent": ["error", 2],
     "react/jsx-indent-props": ["error", 2],
     "react/jsx-key": ["error"],
-    "react/jsx-max-props-per-line": ["error", { "maximum": 2 }],
+    "react/jsx-max-props-per-line": ["error", { "maximum": 3 }],
     "react/jsx-no-comment-textnodes": ["error"],
     "react/jsx-no-duplicate-props": ["error"],
     "react/jsx-no-literals": ["error"],
     "react/jsx-no-target-blank": ["error"],
     "react/jsx-pascal-case": ["error"],
-    "react/jsx-sort-props": ["error", {
-      "callbacksLast": true,
-      "shorthandLast": true,
-      "ignoreCase": true
-    }],
     "react/jsx-space-before-closing": ["error", "always"],
     "react/jsx-tag-spacing": ["error", {
       "closingSlash": "never",

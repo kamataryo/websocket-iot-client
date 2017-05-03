@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { connect }          from 'react-redux'
 import PropTypes            from 'prop-types'
+import AppBar               from 'material-ui/AppBar'
 import Checkbox             from 'material-ui/Checkbox'
 import CircularProgress     from 'material-ui/CircularProgress'
 import RaisedButton         from 'material-ui/RaisedButton'
@@ -22,20 +23,22 @@ const ACCESS_TOKEN = 'access_token'
  * @return {Props}       mapping props
  */
 const mapStateToProps = state => ({
-  isLoading          : state.isLoading,
-  endpoint           : state.endpoint,
-  username           : state.username,
-  password           : state.password,
-  error              : state.error,
-  enableLocalStorage : state.enableLocalStorage,
+  isLoading          : state.app.isLoading,
+  isLoggedIn         : state.app.isLoggedIn,
+  endpoint           : state.app.endpoint,
+  username           : state.app.username,
+  password           : state.app.password,
+  error              : state.app.error,
+  enableLocalStorage : state.app.enableLocalStorage,
 })
 
 /**
  * mapDispatchToProps
  * @param  {Dispatch} dispatch dispatcher
+ * @param  {Props}    props props
  * @return {Props}             Mapping props
  */
-const mapDispatchToProps = dispatch => ({
+const mapDispatchToProps = (dispatch, props) => ({
   startLoad    : () => dispatch({ type: 'DISPLAY_LOADING', payload: { loading: true } }),
   updateParams : kvs => dispatch({ type: 'UPDATE_PARAMS', payload: kvs }),
 
@@ -47,7 +50,12 @@ const mapDispatchToProps = dispatch => ({
       localStorage.clear()
     }
 
+    /**
+     * Socket.IO instance
+     * @type {Socket}
+     */
     const socket = io.connect(endpoint)
+
     socket.on('connect', () => {
 
       // try auth
@@ -55,6 +63,7 @@ const mapDispatchToProps = dispatch => ({
 
       // add Event Listener on authentication success/failure
       socket.on('permit', ({ permission, token }) => {
+
         if (permission) {
           // save token in local storage
           if (enableLocalStorage) {
@@ -68,6 +77,8 @@ const mapDispatchToProps = dispatch => ({
             dispatch({ type: 'LOGIN', payload: { login: true } })
             // clean up username and password
             dispatch({ type: 'UPDATE_PARAMS', payload: { username: '', password: '' } })
+            // go!
+            props.history.push('/')
           }, config.loadingDelay)
 
           // this client doesn't need permitation from now
@@ -147,6 +158,7 @@ export default class LoginView extends Component {
 
   static PropTypes = {
     isLoading    : PropTypes.boolean,
+    isLoggedIn   : PropTypes.boolean,
     endpoint     : PropTypes.string,
     username     : PropTypes.string,
     password     : PropTypes.string,
@@ -163,6 +175,7 @@ export default class LoginView extends Component {
 
   static defaultProps = {
     isLoading    : false,
+    isLoggedIn   : false,
     endpoint     : '',
     username     : '',
     password     : '',
@@ -201,6 +214,7 @@ export default class LoginView extends Component {
 
     const  {
       isLoading,
+      isLoggedIn,
       endpoint,
       username,
       password,
@@ -211,61 +225,74 @@ export default class LoginView extends Component {
     } = this.props
 
     return (
-      <div>
+      <main style={ style.mainWrap }>
+
+        <header>
+          <AppBar
+            showMenuIconButton={ false }
+            title={ config.title + '- Login' }
+          />
+        </header>
+
         <section>
 
-          <div style={ style.verticalMargin.x1 }>
+          {
+            isLoggedIn ?
+              <p>{ 'ログインしています。' }</p> :
+              <div>
+                <div style={ style.verticalMargin.x1 }>
+                  <TextField
+                    errorText={ error === 'CONN_ERROR' ? '接続できませんでした' : false }
+                    hintText={ 'Socket.IO Endpoint URL' }
+                    value={ endpoint }
+                    onChange={ e => updateParams({ endpoint : e.target.value }) }
+                    onFocus={ () => updateParams({ error    : false }) }
+                  /><br />
 
-            <TextField
-              errorText={ error === 'CONN_ERROR' ? '接続できませんでした' : false }
-              hintText={ 'Socket.IO Endpoint URL' }
-              value={ endpoint }
-              onChange={ e => updateParams({ endpoint : e.target.value }) }
-              onFocus={ () => updateParams({ error    : false }) }
-            /><br />
+                  <TextField
+                    errorText={ error === 'AUTH_ERROR' ? '認証に失敗しました' : false }
+                    hintText={ 'username' }
+                    value={ username }
+                    onChange={ e => updateParams({ username : e.target.value }) }
+                    onFocus={ () => updateParams({ error    : false }) }
+                  /><br />
 
-            <TextField
-              errorText={ error === 'AUTH_ERROR' ? '認証に失敗しました' : false }
-              hintText={ 'username' }
-              value={ username }
-              onChange={ e => updateParams({ username : e.target.value }) }
-              onFocus={ () => updateParams({ error    : false }) }
-            /><br />
+                  <TextField
+                    errorText={ error === 'AUTH_ERROR' ? '認証に失敗しました' : false }
+                    hintText={ 'password' }
+                    type={ 'password' }
+                    value={ password }
+                    onChange={ e => updateParams({ password : e.target.value }) }
+                    onFocus={ () => updateParams({ error    : false }) }
+                  /><br />
+                </div>
 
-            <TextField
-              errorText={ error === 'AUTH_ERROR' ? '認証に失敗しました' : false }
-              hintText={ 'password' }
-              type={ 'password' }
-              value={ password }
-              onChange={ e => updateParams({ password : e.target.value }) }
-              onFocus={ () => updateParams({ error    : false }) }
-            /><br />
-          </div>
+                <Checkbox
+                  checked={ enableLocalStorage }
+                  label={ '自動でログインする' }
+                  style={ style.verticalMargin.x1 }
+                  onCheck={ (e, value) => updateParams({ enableLocalStorage: value }) }
+                />
 
-          <Checkbox
-            checked={ enableLocalStorage }
-            label={ '自動でログインする' }
-            style={ style.verticalMargin.x1 }
-            onCheck={ (e, value) => updateParams({ enableLocalStorage: value }) }
-          />
+                <RaisedButton
+                  label={ 'LOGIN' }
+                  primary
+                  onTouchTap={ () => connect({ endpoint, username, password, enableLocalStorage }) }
+                />
 
-          <RaisedButton
-            label={ 'LOGIN' }
-            primary
-            onTouchTap={ () => connect({ endpoint, username, password, enableLocalStorage }) }
-          />
+                { isLoading ?
+                  <CircularProgress
+                    size={ 30 }
+                    style={ style.loading }
+                    thickness={ 4 }
+                  /> : null
+                }
+              </div>
 
-          { isLoading ?
-            <CircularProgress
-              size={ 30 }
-              style={ style.loading }
-              thickness={ 5 }
-            /> : null
           }
-
         </section>
 
-      </div>
+      </main>
     )
   }
 }
