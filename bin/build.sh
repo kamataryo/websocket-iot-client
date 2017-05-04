@@ -9,4 +9,5 @@ $LOCAL_BIN/babel ./src/server --out-dir ./dist/server --source-maps inline
 cp ./src/server/package.json ./dist/server/
 pushd ./dist/server
 yarn
+rm yarn.lock
 popd

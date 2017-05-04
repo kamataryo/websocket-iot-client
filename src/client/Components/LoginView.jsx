@@ -249,11 +249,12 @@ export default class LoginView extends Component {
           {
             isLoggedIn ?
               <p>{ 'ログインしています。' }</p> :
-              <div>
+              <div style={ config.formWrap }>
                 <div style={ style.verticalMargin.x1 }>
                   <TextField
                     errorText={ error === 'CONN_ERROR' ? '接続できませんでした' : false }
-                    hintText={ 'Socket.IO Endpoint URL' }
+                    hintText={ 'socket.example.com' }
+                    floatingLabelText={ 'Socket host name' }
                     value={ endpoint }
                     onChange={ e => updateParams({ endpoint : e.target.value }) }
                     onFocus={ () => updateParams({ error    : false }) }
@@ -262,6 +263,7 @@ export default class LoginView extends Component {
                   <TextField
                     errorText={ error === 'AUTH_ERROR' ? '認証に失敗しました' : false }
                     hintText={ 'username' }
+                    floatingLabelText={ 'User Name' }
                     value={ username }
                     onChange={ e => updateParams({ username : e.target.value }) }
                     onFocus={ () => updateParams({ error    : false }) }
@@ -270,6 +272,7 @@ export default class LoginView extends Component {
                   <TextField
                     errorText={ error === 'AUTH_ERROR' ? '認証に失敗しました' : false }
                     hintText={ 'password' }
+                    floatingLabelText={ 'Password' }
                     type={ 'password' }
                     value={ password }
                     onChange={ e => updateParams({ password : e.target.value }) }
@@ -284,19 +287,22 @@ export default class LoginView extends Component {
                   onCheck={ (e, value) => updateParams({ enableLocalStorage: value }) }
                 />
 
-                <RaisedButton
-                  label={ 'LOGIN' }
-                  primary
-                  onTouchTap={ () => connect({ endpoint, username, password, enableLocalStorage }) }
-                />
+                <div>
+                  <RaisedButton
+                    label={ 'LOGIN' }
+                    primary
+                    onTouchTap={ () => connect({ endpoint, username, password, enableLocalStorage }) }
+                  />
 
-                { isLoading ?
-                  <span><CircularProgress
-                    size={ 30 }
-                    style={ style.loading }
-                    thickness={ 4 }
-                  /><span>{ 'ログインしています...' }</span></span> : null
-                }
+                  { isLoading ?
+                    <span><CircularProgress
+                      size={ 25 }
+                      thickness={ 3 }
+                      style={ style.loading }
+                    />{ 'ログインしています...' }</span> : null
+                  }
+                </div>
+
               </div>
 
           }
