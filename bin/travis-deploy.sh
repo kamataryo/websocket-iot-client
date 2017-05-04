@@ -21,6 +21,8 @@ npm run build
 pushd ./dist/client
 
 cp ../../README.md ./
+cp ../../src/client/404.html ./
+cp ../../src/client/CNAME ./
 git init
 git config user.name $GIT_USER
 git config user.email $GIT_EMAIL
