@@ -79,7 +79,7 @@ const mapDispatchToProps = (dispatch, props) => ({
             dispatch({ type: 'UPDATE_PARAMS', payload: { username: '', password: '' } })
             // go!
             props.history.push('/')
-          }, config.loadingDelay)
+          }, config.constants.loadingDelay)
 
           // this client doesn't need permitation from now
           socket.off('permit')
@@ -240,7 +240,7 @@ export default class LoginView extends Component {
         <header>
           <AppBar
             showMenuIconButton={ false }
-            title={ config.title + '- Login' }
+            title={ config.constants.title + '- Login' }
           />
         </header>
 

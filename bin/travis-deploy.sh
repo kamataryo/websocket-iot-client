@@ -23,6 +23,7 @@ pushd ./dist/client
 cp ../../README.md ./
 cp ../../src/client/404.html ./
 cp ../../src/client/CNAME ./
+sed -i -e "s/localhost:3001/socket.biwako.io/g" ./config.js
 touch .nojekyll
 git init
 git config user.name $GIT_USER

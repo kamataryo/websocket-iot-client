@@ -3,7 +3,7 @@ import config from '../config'
 
 const tokenExists = !!localStorage.getItem(config.constants.ACCESS_TOKEN)
 const initialState = {
-  endpoint           : 'http://localhost:3001',
+  endpoint           : `//${config.socketHostDefault}`,
   username           : '',
   password           : '',
   error              : false,

@@ -92,7 +92,7 @@ export default class ControllerView extends Component {
               </IconMenu>
             }
             showMenuIconButton={ false }
-            title={ config.title + ' | Controller' }
+            title={ config.constants.title + ' | Controller' }
             onRightIconButtonTouchTap={ logout }
           />
         </header>
