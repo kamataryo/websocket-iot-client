@@ -2,7 +2,7 @@
 LOCAL_BIN="./node_modules/.bin"
 
 # build client
-$LOCAL_BIN/webpack -p
+NODE_ENV=production $LOCAL_BIN/webpack -p
 
 # build server
 $LOCAL_BIN/babel ./src/server --out-dir ./dist/server --source-maps inline

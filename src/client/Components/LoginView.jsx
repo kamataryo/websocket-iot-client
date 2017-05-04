@@ -54,7 +54,7 @@ const mapDispatchToProps = (dispatch, props) => ({
      * Socket.IO instance
      * @type {Socket}
      */
-    const socket = io.connect(endpoint)
+    const socket = io.connect(`//${endpoint}`)
 
     socket.on('connect', () => {
 

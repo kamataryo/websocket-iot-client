@@ -1,5 +1,6 @@
 import path              from 'path'
 import HtmlWebpackPlugin from 'html-webpack-plugin'
+import webpack           from 'webpack'
 
 export default {
   entry: path.join(__dirname, '/src/client/main.jsx'),
@@ -31,6 +32,9 @@ export default {
         collapseWhitespace : true
       }
     }),
+    new webpack.DefinePlugin({
+      __PROD__: process.env.NODE_ENV === 'production',
+    })
   ],
   devServer: {
     contentBase        : path.join(__dirname, '/dist/client/'),

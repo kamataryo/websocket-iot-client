@@ -6,5 +6,5 @@ export default {
     // wait until logging in
     loadingDelay : 800,
   },
-  socketHostDefault: 'localhost:3001',
+  socketHostDefault: __PROD__ ? 'socket.biwako.io' : 'localhost:3001',
 }
