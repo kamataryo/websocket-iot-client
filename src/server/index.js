@@ -88,7 +88,7 @@ socketIO
           // reflect the connecting client's state to all
           socket.on('upstream', data => {
             process.stdout.write(`[${UPSTREAM}][${Date()}] ${username} upload ${JSON.stringify(data)}.\n`)
-            store.data = { ...store.data, ...data }
+            store.data = Object.assign(store.data, data)
             socket.broadcast.emit('downstream', data)
             process.stdout.write(`[${DOWNSTREAM}][${Date()}] system is broadcasting ${JSON.stringify(data)}\n`)
             // exec change hook

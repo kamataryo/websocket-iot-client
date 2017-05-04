@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "chalk": "^1.1.3",
+    "express": "^4.15.2",
+    "forever": "^0.15.3",
+    "jsonwebtoken": "^7.3.0",
+    "mongoose": "^4.9.5",
+    "socket.io": "^1.7.3",
+    "switz": "^0.0.17"
+  }
+}
