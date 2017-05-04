@@ -19,7 +19,7 @@ see http://kamataryo.github.io/websocket-iot-ui/
 ### server
 
 ```
-git clone -b _server https://github.com/kamataryo/websocket-iot-ui.git
+git clone -b _server_release https://github.com/kamataryo/websocket-iot-ui.git
 forever start 'node ./websocket-iot-ui/index.js'
 ```
 
