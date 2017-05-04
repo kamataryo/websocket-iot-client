@@ -11,4 +11,8 @@
    server: {
      port: 3001,
    },
+   users : [
+     { username: 'admin', password: 'admin' },
+     { username: 'admin', password: 'admin' },
+   ]
  }

@@ -15,7 +15,7 @@ const ERRORs = {
   CONN_ERROR: 'サーバーとの接続に失敗しました',
 }
 
-const ACCESS_TOKEN = 'access_token'
+const ACCESS_TOKEN = config.constants.ACCESS_TOKEN
 
 /**
  * mapStateToProps
@@ -35,7 +35,7 @@ const mapStateToProps = state => ({
 /**
  * mapDispatchToProps
  * @param  {Dispatch} dispatch dispatcher
- * @param  {Props}    props props
+ * @param  {Props}    props    props
  * @return {Props}             Mapping props
  */
 const mapDispatchToProps = (dispatch, props) => ({
@@ -113,6 +113,8 @@ const mapDispatchToProps = (dispatch, props) => ({
                 localStorage.removeItem(ACCESS_TOKEN)
                 // do logout
                 dispatch({ type: 'LOGIN', payload: { login: false } })
+                // clean state
+                dispatch({ type: 'UPDATE_PARAMS', payload: { enableLocalStorage: false } })
               }
             }
           })

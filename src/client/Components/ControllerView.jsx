@@ -36,12 +36,26 @@ const mapStateToProps = state => ({
  */
 export default class ControllerView extends Component {
 
+  /**
+   * Type checking
+   * @type {Object}
+   */
   static PropTypes = {
     buttonState  : PropTypes.object.isRequired,
     buttonUpdate : PropTypes.func.isRequired,
     isLoggedIn   : PropTypes.bool.isRequired,
     logout       : PropTypes.func.isRequired,
     history      : PropTypes.shape({ push: PropTypes.func }).isRequired
+  }
+
+  /**
+   * Component will mount
+   * @return {void}
+   */
+  componentWillMount() {
+    if (!this.props.isLoggedIn) {
+      this.props.history.replace('/login')
+    }
   }
 
   /**

@@ -1,12 +1,13 @@
 import update from 'immutability-helper'
+import config from '../config'
 
-
+const tokenExists = !!localStorage.getItem(config.constants.ACCESS_TOKEN)
 const initialState = {
   endpoint           : 'http://localhost:3001',
   username           : '',
-  password           : '',
+  password           : tokenExists ? 'just a place holder' : '',
   error              : false,
-  enableLocalStorage : false,
+  enableLocalStorage : tokenExists,
   buttonState        : {},
   callbacks          : {},
   isLoading          : false,
