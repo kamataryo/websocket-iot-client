@@ -19,7 +19,7 @@ const PORT = process.env.PORT || config.server.port
 
 
 /**
- * Store data
+ * data store
  * @type {Object}
  */
 const store = { data: {} }
@@ -28,16 +28,22 @@ const store = { data: {} }
 const app = express()
 const server = http.createServer(app)
 
+/**
+ * Start server
+ */
 server
   .listen(PORT, () => process.stdout.write(`WebSocket Server is listening on *:${PORT}\n`))
 
+/**
+ * in case access to websocket URL via browser
+ */
 app
   .use((req, res, next) => {
     process.stdout.write('error')
     next()
   })
 
-// db
+// connect db
 try {
   mongoose.connect(`mongodb://${config.mongo.dbhost}:${config.mongo.dbport}/${config.mongo.dbname}`)
 } catch (e) {
@@ -46,6 +52,10 @@ try {
   process.exit(1)
 }
 
+/**
+ * number who connects
+ * @type {number}
+ */
 let connectCount = 0
 
 // socket IO handling
@@ -60,9 +70,9 @@ socketIO
 
       process.stdout.write(`[${CONNECTION}][${Date()}] ${username} is connected.\n`)
 
-      authenticate(data, (err, { success, token, authuser }) => {
+      authenticate(data)
+        .then(({ token, authuser }) => {
 
-        if (success) {
           // overwrite
           username = authuser || username
 
@@ -88,19 +98,19 @@ socketIO
           socket.on('disconnect', () => {
             process.stdout.write(`[${CONNECTION}][${Date()}] ${username} is disconnected.\n`)
             // exec terminated hook
-            if (connectCount-- - 1) { // check if you are the first
+            if (connectCount-- - 1) { // check if you are the last
               hooks.terminate()
             }
           })
-
-        } else {
+        })
+        .catch(e => {
           socket.emit('permit', false)
           socket.disconnect()
           process.stdout.write(`[${AUTHORIZATION}][${Date()}] ${username} is not authorized.\n`)
           process.stdout.write(`[${CONNECTION}][${Date()}] ${username} is disconnected.\n`)
-        }
-
-      })
-
+          if (e) {
+            process.sterr.write(e)
+          }
+        })
     })
   })

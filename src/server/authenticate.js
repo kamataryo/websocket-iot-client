@@ -6,30 +6,26 @@ import User   from './models/User'
 const privateKey = fs.readFileSync(__dirname + '/../../id_ecdsa')
 
 /**
- * do authentication
- * @param  {{username:string,password:string,token:string}} data    data for authentication
- * @param  {Function} callback callback after auth
- * @return {object}            return result of callback
+ * Promise user authentication
+ * @param  {{username:string,password:string,token:string}} data data for authentication
+ * @return {Promise} do authentication
  */
-export default (data, callback) => {
+export default data => new Promise((resolve, reject) => {
 
-  const { username, password, token } = data
   /**
-   * type fallback
-   * @param {object} noop noop
-   * @return {function} falled back function with noop
+   * parse the argument
+   * @type {object}
    */
-  const resultIn = typeof callback === 'function' ? callback : noop => noop
+  const { username, password, token } = data
 
   if (token) {
     // token authorization
-    jwt.verify(token, privateKey, (err, data) => {
+    return jwt.verify(token, privateKey, (err, data) => {
       if (err) {
-        return resultIn(err, { success: false })
+        reject(err ? err : data)
       } else {
         const { username } = data
-        return resultIn(undefined, {
-          success  : true,
+        resolve({
           token    : token,
           authuser : username,
         })
@@ -39,17 +35,19 @@ export default (data, callback) => {
     // username:password authentication
     return User
       .find({ username, password })
-      .exec((err, docs) => {
-        return resultIn(undefined, {
-          // NOTE: this is simply sample of the authentication
-          // you should replace this.
-          success: docs.length > 0,
-          token: jwt.sign(
-            { username },
-            privateKey,
-            { expiresIn: config.expiresIn }
-          )
-        })
+      .then(docs => {
+        if (docs.length > 1) {
+          const username = docs[0].username
+          jwt.sign({ username }, privateKey, { expiresIn: config.expiresIn }, (err, token) => {
+            resolve({
+              token: token,
+              authuser: username
+            })
+          })
+        } else {
+          reject()
+        }
       })
+      .catch(e => console.log(e))
   }
-}
+})

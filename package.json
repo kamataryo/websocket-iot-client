@@ -7,7 +7,7 @@
     "install": "./bin/keygen.sh -y",
     "start": "./bin/start.sh",
     "lint": "eslint . --ext=js --ext=jsx",
-    "test": "ava",
+    "test": "./bin/test.sh",
     "build": "./bin/build.sh"
   },
   "ava": {
@@ -37,6 +37,7 @@
     "jsonwebtoken": "^7.3.0",
     "material-ui": "^0.17.4",
     "mongoose": "^4.9.5",
+    "pify": "^2.3.0",
     "prop-types": "^15.5.8",
     "react": "^15.5.4",
     "react-dom": "^15.5.4",
