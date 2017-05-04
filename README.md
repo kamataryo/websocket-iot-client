@@ -10,6 +10,19 @@ Example UI works with RaspberryPi easy IoT home kit.
 - mongoDB
 - ssh-keygen
 
+## usage
+
+### client
+
+see http://kamataryo.github.io/websocket-iot-ui/
+
+### server
+
+```
+git clone -b _server https://github.com/kamataryo/websocket-iot-ui.git
+forever start 'node ./websocket-iot-ui/index.js'
+```
+
 ## development
 
 ```
