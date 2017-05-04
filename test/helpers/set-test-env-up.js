@@ -5,3 +5,5 @@ const { window } = new JSDOM('<body></body>')
 global.window = window
 global.document = window.document
 global.navigator = window.navigator
+
+global.__PROD__ = false
