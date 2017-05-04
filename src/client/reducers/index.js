@@ -5,7 +5,7 @@ const tokenExists = !!localStorage.getItem(config.constants.ACCESS_TOKEN)
 const initialState = {
   endpoint           : 'http://localhost:3001',
   username           : '',
-  password           : tokenExists ? 'just a place holder' : '',
+  password           : '',
   error              : false,
   enableLocalStorage : tokenExists,
   buttonState        : {},

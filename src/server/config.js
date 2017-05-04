@@ -13,6 +13,6 @@
    },
    users : [
      { username: 'admin', password: 'admin' },
-     { username: 'admin', password: 'admin' },
+     { username: 'guest', password: 'guest' },
    ]
  }

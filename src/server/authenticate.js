@@ -14,14 +14,20 @@ const privateKey = fs.readFileSync(__dirname + '/../../id_ecdsa')
 export default (data, callback) => {
 
   const { username, password, token } = data
-  const resultIn = typeof callback === 'function' ? callback : x => x
+  /**
+   * type fallback
+   * @param {object} noop noop
+   * @return {function} falled back function with noop
+   */
+  const resultIn = typeof callback === 'function' ? callback : noop => noop
 
   if (token) {
     // token authorization
-    jwt.verify(token, privateKey, (err, { username }) => {
+    jwt.verify(token, privateKey, (err, data) => {
       if (err) {
         return resultIn(err, { success: false })
       } else {
+        const { username } = data
         return resultIn(undefined, {
           success  : true,
           token    : token,

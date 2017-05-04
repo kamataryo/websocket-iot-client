@@ -191,7 +191,15 @@ export default class LoginView extends Component {
    */
   componentWillMount() {
     const token = localStorage.getItem(ACCESS_TOKEN)
-    if (token) {
+    let expired
+    try {
+      expired = JSON.parse(atob(token.split('.')[1])).exp < new Date().getTime() / 1000
+    } catch (e) {
+      expired = true
+    }
+
+    if (token && !expired) {
+
       if (this.props.error) {
         // token should be revoked
         this.props.updateParams({ error: false })
@@ -283,11 +291,11 @@ export default class LoginView extends Component {
                 />
 
                 { isLoading ?
-                  <CircularProgress
+                  <span><CircularProgress
                     size={ 30 }
                     style={ style.loading }
                     thickness={ 4 }
-                  /> : null
+                  /><span>{ 'ログインしています...' }</span></span> : null
                 }
               </div>
 
