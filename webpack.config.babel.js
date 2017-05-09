@@ -3,9 +3,9 @@ import HtmlWebpackPlugin from 'html-webpack-plugin'
 import webpack           from 'webpack'
 
 export default {
-  entry: path.join(__dirname, '/../src/client/main.jsx'),
+  entry: path.join(__dirname, '/src/main.jsx'),
   output: {
-    path: path.join(__dirname, '/../dist/client/'),
+    path: path.join(__dirname, '/dist/'),
     publicPath: '',
     filename: 'bundle.js'
   },
@@ -23,9 +23,9 @@ export default {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template : path.join(__dirname, '/../src/client/index.html'),
+      template : path.join(__dirname, '/src/index.html'),
       hash     : false,
-      favicon  : path.join(__dirname, '/../src/client/favicon.ico'),
+      favicon  : path.join(__dirname, '/src/favicon.ico'),
       filename : 'index.html',
       inject   : 'body',
       minify   : {
@@ -37,7 +37,7 @@ export default {
     })
   ],
   devServer: {
-    contentBase        : path.join(__dirname, '/../dist/client/'),
+    contentBase        : path.join(__dirname, '/dist/'),
     compress           : true,
     port               : 3000,
     historyApiFallback : true
