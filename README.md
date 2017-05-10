@@ -19,3 +19,10 @@ $ cd websocket-iot-client
 $ npm install
 $ npm start
 ```
+
+## docker
+
+```
+$ docker pull kamataryo/websocket-iot-client
+$ docker run -d -p 3000:3000 kamataryo/websocket-iot-client
+```
