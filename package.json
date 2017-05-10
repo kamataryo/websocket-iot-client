@@ -7,7 +7,8 @@
     "start": "webpack-dev-server -p --progress --colors --hot --inline --watch",
     "lint": "eslint . --ext=js --ext=jsx",
     "test": "NODE_PATH=./src/ ava",
-    "build": "webpack -p"
+    "build": "webpack -p",
+    "serve": "node ./bin/serve.js"
   },
   "ava": {
     "files": [
@@ -31,10 +32,12 @@
   },
   "homepage": "https://github.com/KamataRyo/board_server#readme",
   "dependencies": {
+    "express": "^4.15.2",
     "forever": "^0.15.3",
     "history": "^4.6.1",
     "immutability-helper": "^2.1.2",
     "material-ui": "^0.17.4",
+    "morgan": "^1.8.1",
     "prop-types": "^15.5.8",
     "react": "^15.5.4",
     "react-dom": "^15.5.4",
