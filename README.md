@@ -22,7 +22,16 @@ $ npm start
 
 ## docker
 
+### build and run
+
+```shell
+$ docker build --tag yourname/websocket-iot-client .
+$ docker run -d -p 3000:3000 yourname/websocket-iot-client
 ```
+
+### pull and run
+
+```shell
 $ docker pull kamataryo/websocket-iot-client
 $ docker run -d -p 3000:3000 kamataryo/websocket-iot-client
 ```
