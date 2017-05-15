@@ -7,12 +7,14 @@
   },
   "plugins": [
     "import",
+    "flowtype",
     "jsx-a11y",
     "react",
     "ava"
   ],
   "extends": [
-    "plugin:ava/recommended"
+    "plugin:ava/recommended",
+    "plugin:flowtype/recommended"
     ],
   "parser": "babel-eslint",
   "parserOptions": {
@@ -146,7 +148,11 @@
     "jsx-a11y/tabindex-no-positive": ["error"]
   },
   "settings": {
-    "import/resolver": {"node": {
+    "flowtype": {
+      "onlyFilesWithFlowAnnotation": true
+    },
+    "import/resolver": {
+      "node": {
         "paths": [
         "src",
         "test"
