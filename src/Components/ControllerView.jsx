@@ -1,6 +1,8 @@
-import React, { Component } from 'react'
-import PropTypes            from 'prop-types'
-import { connect }          from 'react-redux'
+import React, { PureComponent } from 'react'
+import PropTypes                from 'prop-types'
+import { connect }              from 'react-redux'
+
+import { Link }     from 'react-router-dom'
 import AppBar       from 'material-ui/AppBar'
 import Toggle       from 'material-ui/Toggle'
 import IconMenu     from 'material-ui/IconMenu'
@@ -9,9 +11,9 @@ import IconButton   from 'material-ui/IconButton'
 import Person       from 'material-ui/svg-icons/social/person'
 import RaisedButton from 'material-ui/RaisedButton'
 import Divider      from 'material-ui/Divider'
-import config       from '../config'
-import style        from '../style'
-import { Link } from 'react-router-dom'
+
+import config from '../config'
+import style  from '../style'
 
 /**
  * mapStateToProps
@@ -34,7 +36,7 @@ const mapStateToProps = state => ({
  * ControllerView
  * @type {ReactComponent}
  */
-export default class ControllerView extends Component {
+export default class ControllerView extends PureComponent {
 
   /**
    * Type checking

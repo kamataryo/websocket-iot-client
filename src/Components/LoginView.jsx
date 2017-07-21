@@ -1,14 +1,15 @@
-import React, { Component } from 'react'
-import { connect }          from 'react-redux'
-import PropTypes            from 'prop-types'
-import AppBar               from 'material-ui/AppBar'
-import Checkbox             from 'material-ui/Checkbox'
-import CircularProgress     from 'material-ui/CircularProgress'
-import RaisedButton         from 'material-ui/RaisedButton'
-import TextField            from 'material-ui/TextField'
-import io                   from 'socket.io-client'
-import config               from '../config'
-import style                from '../style'
+import React, { PureComponent } from 'react'
+import { connect }              from 'react-redux'
+import PropTypes                from 'prop-types'
+
+import AppBar           from 'material-ui/AppBar'
+import Checkbox         from 'material-ui/Checkbox'
+import CircularProgress from 'material-ui/CircularProgress'
+import RaisedButton     from 'material-ui/RaisedButton'
+import TextField        from 'material-ui/TextField'
+
+import config from '../config'
+import style  from '../style'
 
 const ERRORs = {
   AUTH_ERROR: '認証に失敗しました',
@@ -35,116 +36,12 @@ const mapStateToProps = state => ({
 /**
  * mapDispatchToProps
  * @param  {Dispatch} dispatch dispatcher
- * @param  {Props}    props    props
  * @return {Props}             Mapping props
  */
-const mapDispatchToProps = (dispatch, props) => ({
+const mapDispatchToProps = dispatch => ({
   startLoad    : () => dispatch({ type: 'DISPLAY_LOADING', payload: { loading: true } }),
   updateParams : kvs => dispatch({ type: 'UPDATE_PARAMS', payload: kvs }),
-
-  connect      : ({ endpoint, username, password, token, enableLocalStorage }) => {
-    // display loading
-    dispatch({ type: 'DISPLAY_LOADING', payload: { loading: true } })
-    // initialize local storage
-    if (!enableLocalStorage) {
-      localStorage.clear()
-    }
-
-    /**
-     * Socket.IO instance
-     * @type {Socket}
-     */
-    const socket = io.connect(`//${endpoint}`)
-
-    socket.on('connect', () => {
-
-      // try auth
-      socket.emit('auth', { username, password, token })
-
-      // add Event Listener on authentication success/failure
-      socket.on('permit', ({ permission, token }) => {
-
-        if (permission) {
-          // save token in local storage
-          if (enableLocalStorage) {
-            localStorage.setItem(ACCESS_TOKEN, token)
-          }
-
-          setTimeout(() => {
-            // disable loading display
-            dispatch({ type: 'DISPLAY_LOADING', payload: { loading: false } })
-            // login
-            dispatch({ type: 'LOGIN', payload: { login: true } })
-            // clean up username and password
-            dispatch({ type: 'UPDATE_PARAMS', payload: { username: '', password: '' } })
-            // go!
-            props.history.push('/')
-          }, config.constants.loadingDelay)
-
-          // this client doesn't need permitation from now
-          socket.off('permit')
-
-          // add Event Listener of downstream
-          socket.on('downstream', buttonState => {
-            dispatch({
-              type: 'UPDATE_BUTTON_STATE',
-              payload: { buttonState }
-            })
-          })
-
-          // add Event Listener of upstream as callback
-          dispatch({
-            type: 'DEFINE_CALLBACK',
-            payload: {
-              name: 'emitUpstream',
-              callback: buttonState => {
-                socket.emit('upstream', buttonState)
-                dispatch({ type: 'UPDATE_BUTTON_STATE', payload: { buttonState } })
-              }
-            }
-          })
-
-          // add Logout callback
-          dispatch({
-            type: 'DEFINE_CALLBACK',
-            payload: {
-              name: 'logout',
-              callback: () => {
-                localStorage.removeItem(ACCESS_TOKEN)
-                // do logout
-                dispatch({ type: 'LOGIN', payload: { login: false } })
-                // clean state
-                dispatch({ type: 'UPDATE_PARAMS', payload: { enableLocalStorage: false } })
-              }
-            }
-          })
-
-        } else {
-          // remove unnecessary event handler for safety
-          socket.off('disconnect')
-          // auth failed and close connection
-          socket.disconnect()
-          dispatch({ type: 'UPDATE_PARAMS', payload: { error: 'AUTH_ERROR' } })
-          dispatch({ type: 'DISPLAY_LOADING', payload: { loading: false } })
-        }
-      })
-    })
-
-    // maybe serverside panic
-    socket.on('disconnect', () => {
-      socket.disconnect()
-      dispatch({ type: 'UPDATE_PARAMS', payload: { error: 'CONN_ERROR' } })
-      dispatch({ type: 'LOGIN', payload: { login: false } })
-      dispatch({ type: 'DISPLAY_LOADING', payload: { loading: false } })
-    })
-
-    socket.on('connect_error', () => {
-      socket.disconnect()
-      dispatch({ type: 'UPDATE_PARAMS', payload: { error: 'CONN_ERROR' } })
-      dispatch({ type: 'DISPLAY_LOADING', payload: { loading: false } })
-    })
-
-  },
+  connect      : verification => dispatch({ type: 'CONNECT_SOCKET', payload: verification })
 })
 
 /**
@@ -156,7 +53,7 @@ const mapDispatchToProps = (dispatch, props) => ({
  * LoginView
  * @return {ReactComponent} login view
  */
-export default class LoginView extends Component {
+export default class LoginView extends PureComponent {
 
   static PropTypes = {
     isLoading    : PropTypes.boolean,
